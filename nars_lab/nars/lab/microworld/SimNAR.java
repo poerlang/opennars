@@ -1,7 +1,7 @@
 package nars.lab.microworld;
 
 import nars.storage.Memory;
-import nars.core.NAR;
+import nars.main.NAR;
 //import nars.nal.nal8.Operation;
 //import nars.nal.nal8.operator.SyncOperator;
 //import nars.nar.Default;
@@ -14,7 +14,6 @@ import java.awt.*;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
-import nars.core.build.Default;
 import nars.entity.Task;
 import nars.gui.NARSwing;
 import nars.language.Term;
@@ -26,6 +25,7 @@ public class SimNAR extends Frame {
     public SimNAR() {
         String[] args = {"Microworld"};
         MyPapplet mp = new MyPapplet ();
+        mp.setSize(800,600);
         PApplet.runSketch(args, mp);
     }
 
@@ -241,11 +241,12 @@ public class SimNAR extends Frame {
             Hai(int nactions,int nstates)
             {
                 this.nActions = nactions; //for actions since we allow the same randomization phase as in QL
-                nar = new NAR(new Default());
+                nar = new NAR();
                 nar.memory.addOperator(new Right("^Right"));
-                nar.memory.addOperator(new Right("^Left")); 
+                nar.memory.addOperator(new Left("^Left"));
                 (nar.param).noiseLevel.set(0);
                 new NARSwing(nar); 
+                //nar.start(0);
                 Memory m = nar.memory;
                // m.conceptForgetDurations.setValue(1.0); //better for declarative reasoning tasks: 2
                 //m.taskLinkForgetDurations.setValue(1.0); //better for declarative reasoning tasks: 4
@@ -263,6 +264,7 @@ public class SimNAR extends Frame {
                 @Override
                 public List<Task> execute(Operation operation, Term[] args, Memory memory) {
                     lastAction = 1;
+                    memory.allowExecution = false;
                     System.out.println("NAR decide left");
                     return null;
                 }
@@ -275,6 +277,7 @@ public class SimNAR extends Frame {
                 @Override
                 public List<Task> execute(Operation operation, Term[] args, Memory memory) {
                     lastAction = 2;
+                    memory.allowExecution = false;
                     System.out.println("NAR decide right");
                     return null;
                 }
@@ -282,41 +285,57 @@ public class SimNAR extends Frame {
 
             int k=0;
             float Alpha=0.1f;
+            String lastInput = "";
+            int lasthealthy = 0;
             int UpdateSOM(float[] viewField,float reward) //input and reward
             {
                 for(int i=0;i<viewField.length;i++) {
                     if(viewField[i]>0.1f) {
-                        String s = "<{\""+String.valueOf(i)+"\"} --> [on]>. :|: %"+String.valueOf(viewField[i])+"%";
-                        nar.addInput(s);
-                        System.out.println("perceive "+s);
+                        String s = "<{\""+String.valueOf(i)+"\"} --> [on]>. :|:"; // %"+String.valueOf(0.5f+0.5f*viewField[i])+"%";
+                        if(!lastInput.equals(s) || k%5 == 0) {
+                            nar.addInput(s);
+                        }
+                        lastInput = s;
+                        //System.out.println("perceive "+s);
                     }
                 }
                 lastAction = 0;
                 k++;
-                if(k%10==0) {
-                    nar.addInput("<SELF --> [good]>! :|:");
-                    System.out.println("food urge input");
+               if(k%2==0) {
+                   if(k%4 == 0) { //les priority than eating ^^
+                        nar.addInput("<{SELF} --> [healthy]>! :|:");
+                   }
+                   nar.addInput("<{SELF} --> [replete]>! :|:");
+                   //System.out.println("food urge input");
                 }
                 if(reward > 0) {
                     System.out.println("good mr_nars");
-                    nar.addInput("<SELF --> [good]>. :|:");
+                    nar.addInput("<{SELF} --> [replete]>. :|:");
                 }
                 if(reward < 0) {
                     System.out.println("bad mr_nars");
-                    nar.addInput("(--,<SELF --> [good]>). :|:");
+                    lasthealthy = k;
+                    //nar.addInput("(--,<{SELF} --> [good]>). :|:");   
                 }
                 
-                nar.step(500);
+                if(k - lasthealthy > 200 && k%20 == 0) {
+                    nar.addInput("<{SELF} --> [healthy]>. :|:");
+                    System.err.println("I'm healthy "+String.valueOf(k));
+                }
+                
+                nar.cycles(10);
 
                 if(lastAction==0 && random(1.0f)<Alpha) { //if NAR hasn't decided chose a random action
                     lastAction = (int)random((float)nActions);
                     if(lastAction == 1) {
-                        System.out.println("random left");
-                        nar.addInput("Left(SELF). :|:");
+                        //System.out.println("random left");
+                        nar.addInput("Right({SELF}). :|:");
+                       // nar.addInput("Left({SELF}). :|:");
                     }
                     if(lastAction == 2) {
-                        System.out.println("random right");
-                        nar.addInput("Right(SELF). :|:");
+                        //System.out.println("random right");
+                        nar.addInput("Left({SELF}). :|:");
+                       /// nar.addInput("Right({SELF}). :|:");
                     }
                 }
 
@@ -379,8 +398,8 @@ public class SimNAR extends Frame {
             }
             if(j.type==1 || j.type==2)
             {
-                j.x=random(1)*width;
-                j.y=random(1)*height;
+                j.x=padding+random(1)*(width-padding);
+                j.y=padding+random(1)*(height-padding);
             }
         }
         int Hsim_eyesize=3; //9
@@ -429,14 +448,14 @@ public class SimNAR extends Frame {
                 if(action==2)
                 {
                     oi.a+=0.5f;
-                    oi.v=5.0f;
+                    //oi.v=5.0f;
                     //mem.ProcessingInteract(oi.x,oi.y,1.0,10.0);
                 }
                 else
                 if(action==1)
                 {
                     oi.a-=0.5f;
-                    oi.v=5.0f;
+                    //oi.v=5.0f;
                     // mem.ProcessingInteract(oi.x,oi.y,1.0,10.0);
                 }
                 else
@@ -1282,7 +1301,7 @@ public class SimNAR extends Frame {
                 y=Y;
                 a=A;
                 v=V;
-                s=S;
+                s=25.0f;
                 vx=Vx;
                 vy=Vy;
                 type=Type;
@@ -1310,9 +1329,11 @@ public class SimNAR extends Frame {
             size(600,600);
         }
 
+        int padding = 80;
         public void setup()
         {
             this.size(800, 600);
+            this.frameRate(50);
             //mem.simulate_consistency=0.05;
             //mem.simulate_damping=0.90;
             //size(worldSize-200,worldSize-200);
@@ -1326,17 +1347,17 @@ public class SimNAR extends Frame {
                 Hai h=new Hai(nactions,SomSize);
                 //h.som=new Hsom(SomSize,Hsim_eyesize*2);
                 //h.som.Leaky=false;
-                test=new Obj(new Hsim_Custom(),h,(int)(random(1)*(double)width),(int)(random(1)*(double)height),random(1)*2*PI-PI,random(1),0,0,random(1)*5+20,0,Hsim_eyesize);
+                test=new Obj(new Hsim_Custom(),h,(int)(padding+random(1)*(width-padding)),(int)(padding+random(1)*(height-padding)),random(1)*2*PI-PI,random(1),0,0,random(1)*5+20,0,Hsim_eyesize);
                 hsim.obj.add(test);
             }
             lastclicked=((Obj)hsim.obj.get(0));
             for(int i=0;i<5;i++)
             {
-                hsim.obj.add(new Obj(null,null,(int)(random(1)*(double)width),(int)(random(1)*(double)height),random(1)*2*PI,0,0,0,random(1)*5+20,1,10));
+                hsim.obj.add(new Obj(null,null,(int)(padding+random(1)*(width-padding)),(int)(padding+random(1)*(height-padding)),random(1)*2*PI,0,0,0,random(1)*5+20,1,10));
             }
             for(int i=0;i<5;i++)
             {
-                hsim.obj.add(new Obj(null,null,(int)(random(1)*(double)width),(int)(random(1)*(double)height),random(1)*2*PI,0,0,0,random(1)*5+20,2,10));
+                hsim.obj.add(new Obj(null,null,(int)(padding+random(1)*(width-padding)),(int)(padding+random(1)*(height-padding)),random(1)*2*PI,0,0,0,random(1)*5+20,2,10));
             }
             hsim.viewdist=width/5; //4
             label1=new Gui(0,height-25,width,25, "label1", "", false);

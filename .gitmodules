@@ -1,0 +1,3 @@
+[submodule "nars310"]
+	path = nars310
+	url = https://github.com/poerlang/opennars.git

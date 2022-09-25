@@ -23,6 +23,8 @@
  */
 package org.opennars.entity;
 
+import com.poerlang.nars3dview.Item3d;
+
 import java.io.Serializable;
 import java.util.Comparator;
 
@@ -35,7 +37,7 @@ import java.util.Comparator;
  * @author Pei Wang
  * @author Patrick Hammer
  */
-public abstract class Item<K> implements Serializable {
+public abstract class Item<K> extends Item3d implements Serializable {
 
     public static class ItemPriorityComparator<E extends Item> implements Comparator<E> {
 

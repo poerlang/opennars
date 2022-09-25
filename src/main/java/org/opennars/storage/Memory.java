@@ -128,15 +128,9 @@ public class Memory implements Serializable, Iterable<Concept>, Resettable {
     
     public void reset() {
         event.emit(ResetStart.class);
-        synchronized (concepts) {
-            concepts.clear();
-        }
-        synchronized (tasksMutex) {
-            novelTasks.clear();
-        }
-        synchronized(this.seq_current) {
-            this.seq_current.clear();
-        }
+        concepts.clear();
+        novelTasks.clear();
+        this.seq_current.clear();
         if(emotion != null) {
             emotion.resetEmotions();
         }
@@ -228,9 +222,7 @@ public class Memory implements Serializable, Iterable<Concept>, Resettable {
      * add new task that waits to be processed in the next cycleMemory
      */
     public void addNewTask(final Task t, final String reason) {
-        synchronized (tasksMutex) {
-            novelTasks.putIn(t);
-        }
+        novelTasks.putIn(t);
       //  logic.TASK_ADD_NEW.commit(t.getPriority());
         emit(Events.TaskAdd.class, t, reason);
         output(t);
@@ -395,11 +387,9 @@ public class Memory implements Serializable, Iterable<Concept>, Resettable {
      * @param time indirection to retrieve time
      */
     public void processNovelTask(Parameters narParameters, final Timable time) {
-        synchronized (tasksMutex) {
-            final Task task = novelTasks.takeOut();
-            if (task != null) {            
-                localInference(task, narParameters, time);
-            }
+        final Task task = novelTasks.takeOut();
+        if (task != null) {
+            localInference(task, narParameters, time);
         }
     }
 

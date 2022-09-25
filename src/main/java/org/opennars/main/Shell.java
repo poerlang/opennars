@@ -94,8 +94,9 @@ public class Shell {
      * The entry point of the standalone application.
      *
      * @param args command line arguments
+     * @return
      */
-    public static void main(String[] args) throws IOException, InstantiationException, InvocationTargetException, NoSuchMethodException, 
+    public static Nar main(String[] args) throws IOException, InstantiationException, InvocationTargetException, NoSuchMethodException,
             ParserConfigurationException, IllegalAccessException, SAXException, ClassNotFoundException, ParseException, InterruptedException {
         if(args.length == 0) { //in that case just run the instance
             args = new String[] { "null", "null", "null", "null"};
@@ -120,6 +121,7 @@ public class Shell {
         
         log("attaching Shell to Nar...");
         new Shell(nar).run(args);
+        return nar;
     }
 
     public Shell(final Nar n) {

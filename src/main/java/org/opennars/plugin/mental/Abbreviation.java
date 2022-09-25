@@ -143,9 +143,7 @@ public class Abbreviation implements Plugin {
 
         private static Integer currentTermSerial = 1;
         public Term newSerialTerm(final char prefix) {
-            synchronized(currentTermSerial) {
-                currentTermSerial++;
-            }
+            currentTermSerial++;
             return new Term(prefix + String.valueOf(currentTermSerial));
         }
 

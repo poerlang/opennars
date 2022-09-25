@@ -23,6 +23,7 @@
  */
 package org.opennars.language;
 
+import com.poerlang.nars3dview.Item3d;
 import org.apache.commons.lang3.StringUtils;
 import org.opennars.inference.TemporalRules;
 import org.opennars.io.Symbols;
@@ -48,7 +49,7 @@ import java.util.*;
  * @author Pei Wang
  * @author Patrick Hammer
  */
-public class Term implements AbstractTerm, Serializable {
+public class Term extends Item3d implements AbstractTerm, Serializable {
     public ImaginationSpace imagination;
     private static final Map<CharSequence,Term> atoms = new LinkedHashMap();
 

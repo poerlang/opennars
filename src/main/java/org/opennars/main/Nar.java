@@ -79,7 +79,7 @@ public class Nar extends SensoryChannel implements Reasoner, Serializable, Runna
     public Parameters narParameters = new Parameters();
 
     /* System clock, relatively defined to guarantee the repeatability of behaviors */
-    private Long cycle = new Long(0);
+    public Long cycle = 0L;
 
     /**
      * The information about the version of the project
@@ -174,7 +174,7 @@ public class Nar extends SensoryChannel implements Reasoner, Serializable, Runna
     protected transient List<PluginState> plugins = new ArrayList<>(); //was CopyOnWriteArrayList
 
     /** Flag for running continuously  */
-    private transient boolean running = false;
+    public transient boolean running = false;
     /** used by stop() to signal that a running loop should be interrupted */
     private transient boolean stopped = false;
     private transient boolean threadYield;
@@ -656,10 +656,7 @@ public class Nar extends SensoryChannel implements Reasoner, Serializable, Runna
     public void cycle() {
         try {
             memory.cycle(this);
-
-            synchronized (cycle) {
-                cycle++;
-            }
+            cycle++;
         }
         catch (final Exception e) {
             if(Debug.SHOW_REASONING_ERRORS) {

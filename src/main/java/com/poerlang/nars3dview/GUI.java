@@ -94,7 +94,7 @@ public class GUI extends Application {
     private static final float[] printValue = {1f};
     public static String testFile = "nal/single_step/nal1.3.nal";
     public static void startNARS() throws IOException, ParserConfigurationException, ParseException, ClassNotFoundException, InterruptedException, InvocationTargetException, InstantiationException, NoSuchMethodException, IllegalAccessException, SAXException {
-        String[] strParams ={"null","null",testFile,"null"};
+        String[] strParams ={"null","null",testFile,"10"};
         nar = Shell.main(strParams);
     }
     public static void showGUI(){

@@ -172,7 +172,7 @@ public class Shell {
         final TextOutputHandler output = new TextOutputHandler(nar, new PrintWriter(out, true));
         output.setErrors(true);
         output.setErrorStackTrace(true);
-        final InputThread it;
+//        final InputThread it;
 
         final boolean hasInputFile = !args[2].toLowerCase().equals("null");
         final boolean hasNumberOfSteps = !args[3].toLowerCase().equals("null");
@@ -180,14 +180,14 @@ public class Shell {
         if (hasInputFile) {
             nar.addInputFile(args[2]);
         }
-        it = new InputThread(System.in, nar);
-        it.start();
+//        it = new InputThread(System.in, nar);
+//        it.start();
 
         final int numberOfSteps = hasNumberOfSteps ? Integer.parseInt(args[3]) : -1;
 
         if (hasNumberOfSteps) {
             nar.cycles(numberOfSteps);
-            System.exit(0);
+//            System.exit(0);
         } else {
             nar.start();
         }

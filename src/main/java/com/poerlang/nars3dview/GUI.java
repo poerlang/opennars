@@ -93,11 +93,16 @@ public class GUI extends Application {
 
     private static final float[] printValue = {1f};
     public static String testFile = "nal/single_step/nal1.3.nal";
+    static int waitCountToShowCycle = 0;
     public static void startNARS() throws IOException, ParserConfigurationException, ParseException, ClassNotFoundException, InterruptedException, InvocationTargetException, InstantiationException, NoSuchMethodException, IllegalAccessException, SAXException {
+//        第 3 个参数是启动时默认运行的 nal 文件（在assets目录中）； 第 4 给参数是一开始默认运行的循环数
         String[] strParams ={"null","null",testFile,"100"};
+//        String[] strParams ={"null","null","null","null"};
         nar = Shell.main(strParams);
     }
     public static void showGUI(){
+        ImGuiViewport imGuiViewport = imgui.internal.ImGui.getMainViewport();
+        ImGui.setNextWindowPos(imGuiViewport.getPosX()+10,imGuiViewport.getPosY()+10);
         //第一个窗口，用来启动 NARS：
         ImGui.begin("NARS Info Window", ImGuiWindowFlags.AlwaysAutoResize);
 
@@ -105,43 +110,29 @@ public class GUI extends Application {
             if(ImGui.arrowButton("Start NARS", ImGuiDir.Right)){
                 try {
                     startNARS();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                } catch (ParserConfigurationException e) {
-                    e.printStackTrace();
-                } catch (ParseException e) {
-                    e.printStackTrace();
-                } catch (ClassNotFoundException e) {
-                    e.printStackTrace();
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                } catch (InvocationTargetException e) {
-                    e.printStackTrace();
-                } catch (InstantiationException e) {
-                    e.printStackTrace();
-                } catch (NoSuchMethodException e) {
-                    e.printStackTrace();
-                } catch (IllegalAccessException e) {
-                    e.printStackTrace();
-                } catch (SAXException e) {
+                } catch (IOException | ParserConfigurationException | ParseException | ClassNotFoundException | InterruptedException | InvocationTargetException | InstantiationException | NoSuchMethodException | IllegalAccessException | SAXException e) {
                     e.printStackTrace();
                 }
             }
             ImGui.sameLine();
             ImGui.text("Start NARS");
         }else{
-            if(nar.running){
+            if(nar.running || waitCountToShowCycle>0){
+                if(waitCountToShowCycle>0){
+                    waitCountToShowCycle--;
+                }
                 if(ImGui.button("Pause NARS")){
-                    nar.stop();
+                    // nar.stop();//暂时不使用线程，而是直接用 cycle step 来驱动，所以这里也暂时不用 stop
                 }
                 ImGui.sameLine(); ImGui.textColored(0,1f,0,1,"NARS is running "+FontAwesomeIcons.Heart);
             }else{
                 if(ImGui.button("Cycle NARS")){
+                    waitCountToShowCycle = 10;
                     nar.cycles(Settings.narsSetting.step[0]);
                 }
                 ImGui.sameLine(); ImGui.textColored(0.6f,0.6f,0.6f,1,"NARS has stopped "+ FontAwesomeIcons.Snowflake);
-                ImGui.sliderInt("Cycle n Step", Settings.narsSetting.step, 1,20);
             }
+            ImGui.sliderInt("Cycle n Step", Settings.narsSetting.step, 1,50);
             ImGui.text("Test File: "); ImGui.sameLine(); ImGui.textColored(0.6f,0.6f,0.6f,1,testFile);
             ImGui.separator();
 
@@ -166,17 +157,13 @@ public class GUI extends Application {
         }else{
             ImGui.text("Concept Number: 0");
         }
-        if(ImGui.isAnyItemHovered()){
-            MainGame.imGuiHover = true;
-        }else {
-            MainGame.imGuiHover = false;
-        }
+        MainGame.imGuiHover = ImGui.isAnyItemHovered() || ImGui.isWindowHovered();
         ImVec2 windowAPos = ImGui.getWindowPos();
         ImVec2 windowASize = ImGui.getWindowSize();
         ImGui.end();
 
         //第二个窗口，用来设置线宽、颜色等：
-        ImGui.setNextWindowPos(windowAPos.x,windowAPos.y+windowASize.y+20);
+        ImGui.setNextWindowPos(windowAPos.x,windowAPos.y+windowASize.y+20, ImGuiCond.Always);
         ImGui.begin("3D View Setting", ImGuiWindowFlags.AlwaysAutoResize);
         ImGui.sliderFloat("Line3d Width", Settings.lineSetting.lineWidth, 0, 5);
         ImGui.text("Line3d Normal Color:");
@@ -188,12 +175,11 @@ public class GUI extends Application {
         ImGui.text("Line3d Selected Color:");
         ImGui.colorEdit4("Selected Start Point", Settings.lineSetting.selectStartColor.data);
         ImGui.colorEdit4("Selected End Point", Settings.lineSetting.selectEndColor.data);
-        if(ImGui.isAnyItemHovered()){
-            MainGame.imGuiHover = true;
-        }else {
-            MainGame.imGuiHover = false;
-        }
+        MainGame.imGuiHover = ImGui.isAnyItemHovered() || ImGui.isWindowHovered();
         ImGui.end();
+
+        //第三个窗口，输入 nars 语
+        InputTextEdit.show();
     }
 
     @Override

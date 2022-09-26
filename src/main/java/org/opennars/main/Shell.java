@@ -189,7 +189,7 @@ public class Shell {
             nar.cycles(numberOfSteps);
 //            System.exit(0);
         } else {
-            nar.start();
+//            nar.start();
         }
     }
 

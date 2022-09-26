@@ -140,7 +140,8 @@ public class MainGame extends InputAdapter implements ApplicationListener {
         imGuiGlfw.newFrame();
         ImGui.newFrame();
 
-        GUI.showGUI();
+
+        GUI.showGUI(); // 绘制界面
 
 
         ImGui.render();

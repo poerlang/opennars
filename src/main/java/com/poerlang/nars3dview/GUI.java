@@ -2,6 +2,7 @@ package com.poerlang.nars3dview;
 
 import com.poerlang.nars3dview.font.FontAwesomeIcons;
 import com.poerlang.nars3dview.guiexamples.Extra;
+import com.poerlang.nars3dview.setting.Settings;
 import imgui.*;
 import imgui.app.Application;
 import imgui.app.Configuration;
@@ -21,7 +22,6 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.text.ParseException;
-import java.util.Map;
 
 import static com.poerlang.nars3dview.MainGame.nar;
 
@@ -94,7 +94,7 @@ public class GUI extends Application {
     private static final float[] printValue = {1f};
     public static String testFile = "nal/single_step/nal1.3.nal";
     public static void startNARS() throws IOException, ParserConfigurationException, ParseException, ClassNotFoundException, InterruptedException, InvocationTargetException, InstantiationException, NoSuchMethodException, IllegalAccessException, SAXException {
-        String[] strParams ={"null","null",testFile,"10"};
+        String[] strParams ={"null","null",testFile,"100"};
         nar = Shell.main(strParams);
     }
     public static void showGUI(){
@@ -136,10 +136,11 @@ public class GUI extends Application {
                 }
                 ImGui.sameLine(); ImGui.textColored(0,1f,0,1,"NARS is running "+FontAwesomeIcons.Heart);
             }else{
-                if(ImGui.button("Resume NARS")){
-                    nar.run();
+                if(ImGui.button("Cycle NARS")){
+                    nar.cycles(Settings.narsSetting.step[0]);
                 }
                 ImGui.sameLine(); ImGui.textColored(0.6f,0.6f,0.6f,1,"NARS has stopped "+ FontAwesomeIcons.Snowflake);
+                ImGui.sliderInt("Cycle n Step", Settings.narsSetting.step, 1,20);
             }
             ImGui.text("Test File: "); ImGui.sameLine(); ImGui.textColored(0.6f,0.6f,0.6f,1,testFile);
             ImGui.separator();
@@ -177,16 +178,16 @@ public class GUI extends Application {
         //第二个窗口，用来设置线宽、颜色等：
         ImGui.setNextWindowPos(windowAPos.x,windowAPos.y+windowASize.y+20);
         ImGui.begin("3D View Setting", ImGuiWindowFlags.AlwaysAutoResize);
-        ImGui.sliderFloat("Line3d Width", ViewSetting.lineSetting.lineWidth, 0, 5);
+        ImGui.sliderFloat("Line3d Width", Settings.lineSetting.lineWidth, 0, 5);
         ImGui.text("Line3d Normal Color:");
-        ImGui.colorEdit4("Normal Start Point", ViewSetting.lineSetting.normalStartColor.data);
-        ImGui.colorEdit4("Normal End Point", ViewSetting.lineSetting.normalEndColor.data);
+        ImGui.colorEdit4("Normal Start Point", Settings.lineSetting.normalStartColor.data);
+        ImGui.colorEdit4("Normal End Point", Settings.lineSetting.normalEndColor.data);
 
         ImGui.separator();
 
         ImGui.text("Line3d Selected Color:");
-        ImGui.colorEdit4("Selected Start Point", ViewSetting.lineSetting.selectStartColor.data);
-        ImGui.colorEdit4("Selected End Point", ViewSetting.lineSetting.selectEndColor.data);
+        ImGui.colorEdit4("Selected Start Point", Settings.lineSetting.selectStartColor.data);
+        ImGui.colorEdit4("Selected End Point", Settings.lineSetting.selectEndColor.data);
         if(ImGui.isAnyItemHovered()){
             MainGame.imGuiHover = true;
         }else {

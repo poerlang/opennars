@@ -3,9 +3,8 @@ package com.poerlang.nars3dview.items.line3d;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.math.Vector3;
 import com.poerlang.nars3dview.Item3d;
-import com.poerlang.nars3dview.ViewSetting;
+import com.poerlang.nars3dview.setting.Settings;
 import com.poerlang.nars3dview.items.Line3d;
-import com.poerlang.nars3dview.setting.LineSetting;
 
 public class Line3dMeshSegment {
 
@@ -62,7 +61,7 @@ public class Line3dMeshSegment {
         Vector3 dd = point1.sub(point2);
         cross.set(dd).crs(this.direction);
 
-        this.cross.setLength(ViewSetting.lineSetting.lineWidth[0] * 0.5f);
+        this.cross.setLength(Settings.lineSetting.lineWidth[0] * 0.5f);
 
         a.set(start);
         a.add(cross);
@@ -91,11 +90,11 @@ public class Line3dMeshSegment {
         imgui.app.Color startColor;
         imgui.app.Color endColor;
         if(!line3d.isSelect){
-            startColor = ViewSetting.lineSetting.normalStartColor;
-            endColor = ViewSetting.lineSetting.normalEndColor;
+            startColor = Settings.lineSetting.normalStartColor;
+            endColor = Settings.lineSetting.normalEndColor;
         }else {
-            startColor = ViewSetting.lineSetting.selectStartColor;
-            endColor = ViewSetting.lineSetting.selectEndColor;
+            startColor = Settings.lineSetting.selectStartColor;
+            endColor = Settings.lineSetting.selectEndColor;
         }
 
         vertices[0] = a.x;

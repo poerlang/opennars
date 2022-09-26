@@ -5,10 +5,7 @@ import com.poerlang.nars3dview.guiexamples.Extra;
 import imgui.*;
 import imgui.app.Application;
 import imgui.app.Configuration;
-import imgui.flag.ImGuiConfigFlags;
-import imgui.flag.ImGuiDir;
-import imgui.flag.ImGuiInputTextFlags;
-import imgui.flag.ImGuiWindowFlags;
+import imgui.flag.*;
 import imgui.type.ImString;
 import org.opennars.entity.Concept;
 import org.opennars.entity.TermLink;
@@ -95,8 +92,9 @@ public class GUI extends Application {
     }
 
     private static final float[] printValue = {1f};
+    public static String testFile = "nal/single_step/nal1.3.nal";
     public static void startNARS() throws IOException, ParserConfigurationException, ParseException, ClassNotFoundException, InterruptedException, InvocationTargetException, InstantiationException, NoSuchMethodException, IllegalAccessException, SAXException {
-        String[] strParams ={};
+        String[] strParams ={"null","null",testFile,"null"};
         nar = Shell.main(strParams);
     }
     public static void showGUI(){
@@ -143,6 +141,7 @@ public class GUI extends Application {
                 }
                 ImGui.sameLine(); ImGui.textColored(0.6f,0.6f,0.6f,1,"NARS has stopped "+ FontAwesomeIcons.Snowflake);
             }
+            ImGui.text("Test File: "); ImGui.sameLine(); ImGui.textColored(0.6f,0.6f,0.6f,1,testFile);
             ImGui.separator();
 
             ImGui.text("Current Cycle: ");
@@ -150,7 +149,6 @@ public class GUI extends Application {
             ImGui.textColored(0.1f,0.8f,0,1,nar.cycle+"");
         }
         if(nar!=null){
-            ;
             ImGui.text("Concept Number:");
             ImGui.sameLine();
             ImGui.textColored(1f,0.8f,0.3f,1,nar.memory.concepts.size()+"");
@@ -249,6 +247,7 @@ public class GUI extends Application {
                     termLink.toLine();
                     MainGame.add(termLink);
                     Concept targetConcept = nar.memory.concept(termLink.getTarget());
+                    if(targetConcept == null) continue;
                     if(targetConcept.isNone()){
                         addConceptTo3DView(targetConcept);
                     }

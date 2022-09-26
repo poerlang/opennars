@@ -18,7 +18,21 @@ public class InputTextEdit {
     private static final TextEditor EDITOR = new TextEditor();
 
     static {
-        TextEditorLanguageDefinition lang = new TextEditorLanguageDefinition();
+        TextEditorLanguageDefinition lang = TextEditorLanguageDefinition.cPlusPlus();
+
+        String[] ppnames = {
+                "#",
+        };
+        String[] ppvalues = {
+                "word",
+        };
+
+        // Adding custom preproc identifiers
+        Map<String, String> preprocIdentifierMap = new HashMap<>();
+        for (int i = 0; i < ppnames.length; ++i) {
+            preprocIdentifierMap.put(ppnames[i], ppvalues[i]);
+        }
+        lang.setPreprocIdentifiers(preprocIdentifierMap);
 
         String[] identifiers = {
             "-->",
@@ -39,9 +53,9 @@ public class InputTextEdit {
         EDITOR.setLanguageDefinition(lang);
 
         // Adding error markers
-//        Map<Integer, String> errorMarkers = new HashMap<>();
+        Map<Integer, String> errorMarkers = new HashMap<>();
 //        errorMarkers.put(1, "Expected '>'");
-//        EDITOR.setErrorMarkers(errorMarkers);
+        EDITOR.setErrorMarkers(errorMarkers);
 
         EDITOR.setPalette(new int[]{
             0xff7f7f7f,	// Default
@@ -54,8 +68,8 @@ public class InputTextEdit {
             0xffaaaaaa, // Identifier
             0xff9bc64d, // Known identifier
             0xffc040a0, // Preproc identifier
-            0xff206020, // Comment (single line)
-            0xff406020, // Comment (multi line)
+            0xffffffff, // Comment (single line)
+            0xffffffff, // Comment (multi line)
             0xff101010, // Background
             0xffe0e0e0, // Cursor
             0x80a06020, // Selection
@@ -67,8 +81,11 @@ public class InputTextEdit {
             0x40a0a0a0, // Current line edge
         });
         EDITOR.setTextLines(new String[]{
+            "",
+            "",
             "<swan --> swimmer>. %0.90%",
             "<swan --> bird>.",
+            "",
         });
     }
 

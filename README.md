@@ -1,4 +1,4 @@
-![OpenNARS Logo](https://github.com/opennars/opennars/blob/bf53ceef9f2399de70dc63e5507e42d639144c96/doc/opennars_logo2.png)
+![OpenNARS Logo](assets/opennars_logo2.png)
 
 [http://www.opennars.org/](www.opennars.org)
 

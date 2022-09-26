@@ -177,7 +177,7 @@ public class GUI extends Application {
         //第二个窗口，用来设置线宽、颜色等：
         ImGui.setNextWindowPos(windowAPos.x,windowAPos.y+windowASize.y+20);
         ImGui.begin("3D View Setting", ImGuiWindowFlags.AlwaysAutoResize);
-        ImGui.sliderFloat("Line3d Width", ViewSetting.lineSetting.lineWidth, 0, 1);
+        ImGui.sliderFloat("Line3d Width", ViewSetting.lineSetting.lineWidth, 0, 5);
         ImGui.text("Line3d Normal Color:");
         ImGui.colorEdit4("Normal Start Point", ViewSetting.lineSetting.normalStartColor.data);
         ImGui.colorEdit4("Normal End Point", ViewSetting.lineSetting.normalEndColor.data);

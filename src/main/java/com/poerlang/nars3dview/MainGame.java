@@ -26,6 +26,7 @@ import imgui.extension.implot.ImPlot;
 import imgui.flag.ImGuiConfigFlags;
 import imgui.gl3.ImGuiImplGl3;
 import imgui.glfw.ImGuiImplGlfw;
+import org.checkerframework.checker.units.qual.C;
 import org.lwjgl.glfw.GLFW;
 import org.lwjgl.glfw.GLFWErrorCallback;
 import org.lwjgl.opengl.GL;
@@ -34,6 +35,7 @@ import java.util.*;
 
 import com.badlogic.gdx.backends.lwjgl3.Lwjgl3Graphics;
 
+import static com.badlogic.gdx.Gdx.files;
 import static com.poerlang.nars3dview.GUI.initFonts;
 import static org.lwjgl.glfw.GLFW.glfwPollEvents;
 import org.opennars.entity.*;
@@ -166,9 +168,13 @@ public class MainGame extends InputAdapter implements ApplicationListener {
 
     private void createLabel() {
         stage = new Stage();
-        font = new BitmapFont();
-        label = new Label(" ", new Label.LabelStyle(font, Color.WHITE));
-        label.setPosition(6f,6f, Align.bottom);
+        font = new BitmapFont(files.internal("bmfont_config_cn_5000_and_en_002_max.fnt"));
+        font.setColor(Color.WHITE);
+        font.getCache().setColor(1.0f, 183f/255f, 77f/255f, 0.5f);
+        font.getCache().tint(new Color(1f,0,0,1));
+        label = new Label("Label", new Label.LabelStyle(font, Color.WHITE));
+
+        label.setPosition(16f,6f, Align.bottom);
         stage.addActor(label);
         stringBuilder = new StringBuilder();
     }
@@ -203,20 +209,22 @@ public class MainGame extends InputAdapter implements ApplicationListener {
         }
         modelBatch.end();
 
+
         renderPlanes();
 
-        renderLabel();
-
         renderGUI();
+
+        renderLabel();
     }
 
     private void renderLabel() {
         stringBuilder.setLength(0);
-        stringBuilder.append("  FPS: ").append(Gdx.graphics.getFramesPerSecond());
+        stringBuilder.append("  刷新率: ").append(Gdx.graphics.getFramesPerSecond());
         stringBuilder.append("  Visible: ").append(visibles.size());
         stringBuilder.append("  Selected Item: ").append(selectItem!=null ? getTermString(selectItem) : "none");
         label.setText(stringBuilder);
         stage.getViewport().apply();
+        stage.getBatch().setColor(1,1,1,1);
         stage.draw();
     }
 

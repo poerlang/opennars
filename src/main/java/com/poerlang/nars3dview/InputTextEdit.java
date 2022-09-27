@@ -85,6 +85,8 @@ public class InputTextEdit {
             "",
             "<swan --> swimmer>. %0.90%",
             "<swan --> bird>.",
+            "<小特 --> 鸟>.",
+            "<鸟 --> 动物>.",
             "",
         });
     }
@@ -127,7 +129,7 @@ public class InputTextEdit {
                     ImGui.endMenu();
                 }
                 if (ImGui.beginMenu("Run")) {
-                    if (ImGui.menuItem("add text to nars input","Ctrl-I")) {
+                    if (ImGui.menuItem("add text to nars input")) {
                         String textToSave = EDITOR.getText();
                         String[] lines = textToSave.split("\n");
                         for (String line : lines) {

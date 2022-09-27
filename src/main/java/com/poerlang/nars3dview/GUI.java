@@ -18,6 +18,7 @@ import org.xml.sax.SAXException;
 import javax.xml.parsers.ParserConfigurationException;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
+import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -55,39 +56,18 @@ public class GUI extends Application {
      */
     public static void initFonts(final ImGuiIO io) {
         final ImFontAtlas fontAtlas = io.getFonts();
-        fontAtlas.addFontDefault(); // Add default font for latin glyphs
-
-        // You can use the ImFontGlyphRangesBuilder helper to create glyph ranges based on text input.
-        // For example: for a game where your script is known, if you can feed your entire script to it (using addText) and only build the characters the game needs.
-        // Here we are using it just to combine all required glyphs in one place
-        final ImFontGlyphRangesBuilder rangesBuilder = new ImFontGlyphRangesBuilder(); // Glyphs ranges provide
-        rangesBuilder.addRanges(fontAtlas.getGlyphRangesDefault());
-        rangesBuilder.addRanges(fontAtlas.getGlyphRangesCyrillic());
-//        rangesBuilder.addRanges(fontAtlas.getGlyphRangesChineseFull());
-//        rangesBuilder.addRanges(fontAtlas.getGlyphRangesJapanese());
-        rangesBuilder.addRanges(FontAwesomeIcons._IconRange);
-
-        // Font config for additional fonts
-        // This is a natively allocated struct so don't forget to call destroy after atlas is built
         final ImFontConfig fontConfig = new ImFontConfig();
+        final ImFontGlyphRangesBuilder rangesBuilder = new ImFontGlyphRangesBuilder(); // Glyphs ranges provide
         fontConfig.setFontDataOwnedByAtlas(false);
         fontConfig.setGlyphOffset(0,3f);
-        fontConfig.setMergeMode(true);  // Enable merge mode to merge cyrillic, japanese and icons with default font
-//        fontConfig.setPixelSnapH(true);
+        rangesBuilder.addRanges(FontAwesomeIcons._IconRange);
         final short[] glyphRanges = rangesBuilder.buildRanges();
-//        fontAtlas.addFontFromMemoryTTF(loadFromResources("Tahoma.ttf"), 14, fontConfig, glyphRanges); // cyrillic glyphs
-//        fontAtlas.addFontFromMemoryTTF(loadFromResources("NotoSansCJKjp-Medium.otf"), 14, fontConfig, glyphRanges); // japanese glyphs
+        ImFont imFont = fontAtlas.addFontFromMemoryTTF(loadFromResources("./LXGWWenKai-Regular.ttf"), 20, fontConfig, ChineseCharRanges.ranges);
+        io.setFontDefault(imFont);
+        fontConfig.setMergeMode(true);
         fontAtlas.addFontFromMemoryTTF(loadFromResources("./fa-regular-400.otf"), 14, fontConfig, glyphRanges); // font awesome
         fontAtlas.addFontFromMemoryTTF(loadFromResources("./fa-solid-900.ttf"), 14, fontConfig, glyphRanges); // font awesome
-
-//        byte[] fontData = loadFromResources("./Alibaba-PuHuiTi-Regular.ttf");
-//        ImFont imFont = io.getFonts().addFontFromMemoryTTF(fontData, 14, fontConfig, glyphRanges);
-
-//        fontConfig.setFontDataOwnedByAtlas(false);
-//        io.setFontDefault(imFont);
-
         io.getFonts().build();
-
         fontConfig.destroy();
     }
 
@@ -104,8 +84,9 @@ public class GUI extends Application {
         ImGuiViewport imGuiViewport = imgui.internal.ImGui.getMainViewport();
         ImGui.setNextWindowPos(imGuiViewport.getPosX()+10,imGuiViewport.getPosY()+10);
         //第一个窗口，用来启动 NARS：
-        ImGui.begin("NARS Info Window", ImGuiWindowFlags.AlwaysAutoResize);
-
+        ImGui.begin("NARS Info Window", ImGuiWindowFlags.AlwaysAutoResize|ImGuiCond.Once);
+        ImGui.text("UI界面现已支持中文");
+        ImGui.separator();
         if(nar == null){
             if(ImGui.arrowButton("Start NARS", ImGuiDir.Right)){
                 try {
@@ -187,7 +168,8 @@ public class GUI extends Application {
         ImGui.text("Hello, World! " + FontAwesomeIcons.Smile);
         ImGui.text("Hello, World! "+FontAwesomeIcons.Heart);
 //        if (ImGui.button(FontAwesomeIcons.Save + " Save")) {
-        if (ImGui.button(FontAwesomeIcons.Allergies+" Save")) {
+//        if (ImGui.button(FontAwesomeIcons.Allergies+" Save")) {
+        if (ImGui.button("Save")) {
             count++;
         }
         ImGui.sameLine();
@@ -200,12 +182,13 @@ public class GUI extends Application {
         Extra.show(this);
     }
 
-    private static byte[] loadFromResources(String name) {
+    public static byte[] loadFromResources(String name) {
 //        try {
 //            return Files.readAllBytes(Paths.get(GUI.class.getResource(name).toURI()));
 //        } catch (IOException | URISyntaxException e) {
 //            throw new RuntimeException(e);
 //        }
+//
         try {
             Path path = Paths.get(name);
             System.out.println(path.toAbsolutePath());

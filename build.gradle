@@ -54,10 +54,10 @@ tasks.withType(JavaCompile) {
 
 sourceCompatibility = 18
 sourceSets.main.java.srcDirs = [ "src/main/java" ]
-sourceSets.main.resources.srcDirs = ["../assets"]
+sourceSets.main.resources.srcDirs = ["./assets"]
 
-project.ext.mainClassName = "org.opennars.nars3d.DesktopLauncher"
-project.ext.assetsDir = new File("../assets")
+project.ext.mainClassName = "com.poerlang.nars3dview.DesktopLauncher"
+project.ext.assetsDir = new File("./assets")
 
 import org.gradle.internal.os.OperatingSystem
 

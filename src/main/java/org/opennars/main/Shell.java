@@ -29,6 +29,7 @@ import org.xml.sax.SAXException;
 import javax.xml.parsers.ParserConfigurationException;
 import java.io.*;
 import java.lang.reflect.InvocationTargetException;
+import java.nio.charset.Charset;
 import java.text.ParseException;
 import org.opennars.language.Term;
 
@@ -169,7 +170,8 @@ public class Shell {
      * non-static equivalent to {@link #main(String[])} : finish to completion from an addInput file
      */
     public void run(final String[] args) {
-        final TextOutputHandler output = new TextOutputHandler(nar, new PrintWriter(out, true));
+        Charset charset = Charset.forName("UTF-8");
+        final TextOutputHandler output = new TextOutputHandler(nar, new PrintWriter(out, true, charset));
         output.setErrors(true);
         output.setErrorStackTrace(true);
 //        final InputThread it;

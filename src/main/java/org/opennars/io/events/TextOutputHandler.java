@@ -23,6 +23,7 @@
  */
 package org.opennars.io.events;
 
+import org.apache.commons.lang3.CharSet;
 import org.opennars.entity.Sentence;
 import org.opennars.entity.Task;
 import org.opennars.io.Texts;
@@ -30,6 +31,7 @@ import org.opennars.io.events.Events.Answer;
 import org.opennars.main.Nar;
 
 import java.io.*;
+import java.nio.charset.Charset;
 import java.util.Arrays;
 
 /**

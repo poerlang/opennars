@@ -234,7 +234,7 @@ public class MainGame extends InputAdapter implements ApplicationListener {
         }else if(selectItem instanceof TermLink){
             return ((TermLink) selectItem).getTarget().toString();
         }
-        return " no to string function ";
+        return selectItem.toString();
     }
 
     private void renderPlanes() {

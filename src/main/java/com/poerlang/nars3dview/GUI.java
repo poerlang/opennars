@@ -23,6 +23,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.text.ParseException;
+import java.util.Objects;
 
 import static com.poerlang.nars3dview.MainGame.nar;
 
@@ -80,6 +81,8 @@ public class GUI extends Application {
 //        String[] strParams ={"null","null","null","null"};
         nar = Shell.main(strParams);
     }
+    static int refreshCountDown = 0;
+    static Long lastCycleNum = 0L;
     public static void showGUI(){
         ImGuiViewport imGuiViewport = imgui.internal.ImGui.getMainViewport();
         ImGui.setNextWindowPos(imGuiViewport.getPosX()+10,imGuiViewport.getPosY()+10);
@@ -127,12 +130,21 @@ public class GUI extends Application {
             ImGui.textColored(1f,0.8f,0.3f,1,nar.memory.concepts.size()+"");
 
             ImGui.separator();
-
-            if(ImGui.arrowButton("Refresh Concepts in 3D View",1)){
-                nar.stop();
-                refresh3DView(nar.memory.concepts);
+            ImGui.checkbox("Auto Refresh 3D view", Settings.renderSetting.AutoRender);
+            if(!Settings.renderSetting.AutoRender.get()){
+                if(ImGui.arrowButton("Refresh Concepts in 3D View",1)){
+                    nar.stop();
+                    refresh3DView();
+                }
+                ImGui.sameLine(); ImGui.text("Refresh Concepts in 3D View");
+            }else{
+                refreshCountDown++;
+                if(refreshCountDown%2==0){ //refresh once in 2 frame
+                    if( !Objects.equals(lastCycleNum, nar.cycle) ) {
+                        refresh3DView();
+                    }
+                }
             }
-            ImGui.sameLine(); ImGui.text("Refresh Concepts in 3D View");
             ImGui.sliderFloat("Show Percentage", printValue,0,1,"%.2f %");
             ImGui.separator();
         }else{
@@ -198,7 +210,9 @@ public class GUI extends Application {
         }
     }
 
-    private static void refresh3DView(Bag<Concept, Term> entries) {
+    private static void refresh3DView() {
+        Bag<Concept, Term> entries = nar.memory.concepts;
+        lastCycleNum = nar.cycle;
         int count = 0;
         int printNum = Math.round(printValue[0] * entries.size());
         MainGame.clearInstances();

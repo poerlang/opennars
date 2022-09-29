@@ -57,14 +57,14 @@ public class GUI extends Application {
         final ImFontGlyphRangesBuilder rangesBuilder = new ImFontGlyphRangesBuilder(); // Glyphs ranges provide
         fontConfig.setFontDataOwnedByAtlas(false);
         fontConfig.setGlyphOffset(0f,0f);
-        iconConfig.setGlyphOffset(0f,3f);
+        iconConfig.setGlyphOffset(0f,2f);
         rangesBuilder.addRanges(FontAwesomeIcons._IconRange);
         final short[] glyphRanges = rangesBuilder.buildRanges();
         ImFont imFont = fontAtlas.addFontFromMemoryTTF(loadFromResources("./LXGWWenKai-Regular.ttf"), 20, fontConfig, ChineseCharRanges.ranges);
         io.setFontDefault(imFont);
         iconConfig.setMergeMode(true);
-        fontAtlas.addFontFromMemoryTTF(loadFromResources("./fa-regular-400.otf"), 14, iconConfig, glyphRanges); // font awesome
-        fontAtlas.addFontFromMemoryTTF(loadFromResources("./fa-solid-900.ttf"), 14, iconConfig, glyphRanges); // font awesome
+        fontAtlas.addFontFromMemoryTTF(loadFromResources("./fa-regular-400.otf"), 18, iconConfig, glyphRanges); // font awesome
+        fontAtlas.addFontFromMemoryTTF(loadFromResources("./fa-solid-900.ttf"), 18, iconConfig, glyphRanges); // font awesome
         io.getFonts().build();
         fontConfig.destroy();
     }

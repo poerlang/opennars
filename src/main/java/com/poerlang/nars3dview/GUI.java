@@ -58,16 +58,18 @@ public class GUI extends Application {
     public static void initFonts(final ImGuiIO io) {
         final ImFontAtlas fontAtlas = io.getFonts();
         final ImFontConfig fontConfig = new ImFontConfig();
+        final ImFontConfig iconConfig = new ImFontConfig();
         final ImFontGlyphRangesBuilder rangesBuilder = new ImFontGlyphRangesBuilder(); // Glyphs ranges provide
         fontConfig.setFontDataOwnedByAtlas(false);
-        fontConfig.setGlyphOffset(0,3f);
+        fontConfig.setGlyphOffset(0f,0f);
+        iconConfig.setGlyphOffset(0f,3f);
         rangesBuilder.addRanges(FontAwesomeIcons._IconRange);
         final short[] glyphRanges = rangesBuilder.buildRanges();
         ImFont imFont = fontAtlas.addFontFromMemoryTTF(loadFromResources("./LXGWWenKai-Regular.ttf"), 20, fontConfig, ChineseCharRanges.ranges);
         io.setFontDefault(imFont);
-        fontConfig.setMergeMode(true);
-        fontAtlas.addFontFromMemoryTTF(loadFromResources("./fa-regular-400.otf"), 14, fontConfig, glyphRanges); // font awesome
-        fontAtlas.addFontFromMemoryTTF(loadFromResources("./fa-solid-900.ttf"), 14, fontConfig, glyphRanges); // font awesome
+        iconConfig.setMergeMode(true);
+        fontAtlas.addFontFromMemoryTTF(loadFromResources("./fa-regular-400.otf"), 14, iconConfig, glyphRanges); // font awesome
+        fontAtlas.addFontFromMemoryTTF(loadFromResources("./fa-solid-900.ttf"), 14, iconConfig, glyphRanges); // font awesome
         io.getFonts().build();
         fontConfig.destroy();
     }
@@ -130,7 +132,7 @@ public class GUI extends Application {
             ImGui.textColored(1f,0.8f,0.3f,1,nar.memory.concepts.size()+"");
 
             ImGui.separator();
-            ImGui.checkbox("Auto Refresh 3D view", Settings.renderSetting.AutoRender);
+            ImGui.checkbox("Auto Refresh 3D View After Cycle", Settings.renderSetting.AutoRender);
             if(!Settings.renderSetting.AutoRender.get()){
                 if(ImGui.arrowButton("Refresh Concepts in 3D View",1)){
                     nar.stop();
@@ -210,7 +212,7 @@ public class GUI extends Application {
         }
     }
 
-    private static void refresh3DView() {
+    public static void refresh3DView() {
         Bag<Concept, Term> entries = nar.memory.concepts;
         lastCycleNum = nar.cycle;
         int count = 0;

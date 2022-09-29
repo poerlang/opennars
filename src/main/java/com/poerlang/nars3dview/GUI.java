@@ -8,17 +8,12 @@ import imgui.app.Application;
 import imgui.app.Configuration;
 import imgui.flag.*;
 import imgui.type.ImString;
-import org.opennars.entity.Concept;
-import org.opennars.entity.TermLink;
-import org.opennars.language.Term;
 import org.opennars.main.Shell;
-import org.opennars.storage.Bag;
 import org.xml.sax.SAXException;
 
 import javax.xml.parsers.ParserConfigurationException;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
-import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -74,7 +69,6 @@ public class GUI extends Application {
         fontConfig.destroy();
     }
 
-    private static final float[] printValue = {1f};
     public static String testFile = "nal/single_step/nal1.3.nal";
     static int waitCountToShowCycle = 0;
     public static void startNARS() throws IOException, ParserConfigurationException, ParseException, ClassNotFoundException, InterruptedException, InvocationTargetException, InstantiationException, NoSuchMethodException, IllegalAccessException, SAXException {
@@ -83,14 +77,12 @@ public class GUI extends Application {
 //        String[] strParams ={"null","null","null","null"};
         nar = Shell.main(strParams);
     }
-    static int refreshCountDown = 0;
-    static Long lastCycleNum = 0L;
+
     public static void showGUI(){
         ImGuiViewport imGuiViewport = imgui.internal.ImGui.getMainViewport();
         ImGui.setNextWindowPos(imGuiViewport.getPosX()+10,imGuiViewport.getPosY()+10);
         //第一个窗口，用来启动 NARS：
-        ImGui.begin("NARS Info Window", ImGuiWindowFlags.AlwaysAutoResize|ImGuiCond.Once);
-        ImGui.text("UI界面现已支持中文");
+        ImGui.begin("NARS Control", ImGuiWindowFlags.AlwaysAutoResize|ImGuiCond.Once);
         ImGui.separator();
         if(nar == null){
             if(ImGui.arrowButton("Start NARS", ImGuiDir.Right)){
@@ -136,18 +128,18 @@ public class GUI extends Application {
             if(!Settings.renderSetting.AutoRender.get()){
                 if(ImGui.arrowButton("Refresh Concepts in 3D View",1)){
                     nar.stop();
-                    refresh3DView();
+                    View3dRefresh.refresh3DView();
                 }
                 ImGui.sameLine(); ImGui.text("Refresh Concepts in 3D View");
             }else{
-                refreshCountDown++;
-                if(refreshCountDown%2==0){ //refresh once in 2 frame
-                    if( !Objects.equals(lastCycleNum, nar.cycle) ) {
-                        refresh3DView();
+                View3dRefresh.refreshCountDown++;
+                if(View3dRefresh.refreshCountDown%2==0){ //refresh once in 2 frame
+                    if( !Objects.equals(View3dRefresh.lastCycleNum, nar.cycle) ) {
+                        View3dRefresh.refresh3DView();
                     }
                 }
             }
-            ImGui.sliderFloat("Show Percentage", printValue,0,1,"%.2f %");
+            ImGui.sliderFloat("Refresh Percentage", Settings.renderSetting.refreshPercentage.getData(),0,1,"%.2f %");
             ImGui.separator();
         }else{
             ImGui.text("Concept Number: 0");
@@ -212,45 +204,6 @@ public class GUI extends Application {
         }
     }
 
-    public static void refresh3DView() {
-        Bag<Concept, Term> entries = nar.memory.concepts;
-        lastCycleNum = nar.cycle;
-        int count = 0;
-        int printNum = Math.round(printValue[0] * entries.size());
-        MainGame.clearInstances();
-        for (Concept concept : entries) {
-            addConceptTo3DView(concept);
-            count++;
-            if(count>printNum){
-                break;
-            }
-        }
-        for (Item3d entry : MainGame.instances) {
-            if(entry instanceof Concept) {
-                Concept concept = (Concept) entry;
-                // for (TaskLink taskLink : concept.getTaskLinkBag().getNameTable().values()) {
-                //     System.out.println(taskLink.getTargetTask());
-                // }
-                for (TermLink termLink : concept.termLinks) {
-                    termLink.toLine();
-                    MainGame.add(termLink);
-                    Concept targetConcept = nar.memory.concept(termLink.getTarget());
-                    if(targetConcept == null) continue;
-                    if(targetConcept.isNone()){
-                        addConceptTo3DView(targetConcept);
-                    }
-                    termLink.setLinePos(concept, targetConcept);
-                }
-            }
-        }
-    }
-
-    private static void addConceptTo3DView(Concept concept) {
-        concept.toPlane();
-        concept.calcPos();
-        concept.setSize(2);
-        MainGame.add(concept);
-    }
 
     public static void main(final String[] args) {
         launch(new GUI());

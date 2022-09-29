@@ -16,6 +16,8 @@ import org.opennars.main.Nar;
 import java.util.HashMap;
 import java.util.Map;
 
+import static com.poerlang.nars3dview.MainGame.nar;
+
 public class InputTextEdit {
     private static final TextEditor EDITOR = new TextEditor();
 
@@ -95,11 +97,11 @@ public class InputTextEdit {
     }
 
     public static void show() {
-        if(MainGame.nar == null)
+        if(nar == null)
             return;
 
         int inputEditorWidth = 300;
-        imgui.internal.ImGui.setNextWindowSize(inputEditorWidth, 276, ImGuiCond.Once);
+        imgui.internal.ImGui.setNextWindowSize(inputEditorWidth, 376, ImGuiCond.Once);
         ImGuiViewport imGuiViewport = imgui.internal.ImGui.getMainViewport();
         imgui.internal.ImGui.setNextWindowPos(imGuiViewport.getPosX()+imGuiViewport.getSizeX()  - inputEditorWidth - 10, imGuiViewport.getPosY() + 10, ImGuiCond.FirstUseEver);
         if (ImGui.begin("Input Editor",
@@ -141,10 +143,15 @@ public class InputTextEdit {
                 ImGui.endMenuBar();
             }
 
+            ImGui.text("Cycle After Input:");
+            ImGui.sliderInt(" ", Settings.narsSetting.cycleAfterInput.getData(), 0,50);
+            ImGui.separator();
+
             if(ImGui.arrowButton("Play", ImGuiMouseButton.Right)){
                 play();
             }
-            ImGui.sameLine(); ImGui.text("Add Text To NARS Input");
+            ImGui.sameLine(); ImGui.text("Send Text To NARS Channel");
+            ImGui.separator();
 
             EDITOR.render("TextEditor");
             MainGame.imGuiHover = ImGui.isAnyItemHovered() || ImGui.isWindowHovered();
@@ -158,14 +165,15 @@ public class InputTextEdit {
         for (String line : lines) {
             if (line != null && !line.equals("")) {
                 try {
-                    MainGame.nar.addInput(line);
+                    nar.addInput(line);
+                    nar.cycles(Settings.narsSetting.cycleAfterInput.get());
+                    if(!Settings.renderSetting.AutoRender.get()) View3dRefresh.refresh3DView();
                 } catch (Exception ex) {
                     if (Debug.DETAILED) {
                         throw new IllegalStateException("error parsing:" + line, ex);
                     }
                     System.out.println("parsing error");
                 }
-                if(!Settings.renderSetting.AutoRender.get()) GUI.refresh3DView();
             }
         }
     }

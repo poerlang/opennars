@@ -1,11 +1,13 @@
 package com.poerlang.nars3dview;
 
+import com.poerlang.nars3dview.setting.Settings;
 import imgui.ImGui;
 import imgui.ImGuiViewport;
 import imgui.extension.texteditor.TextEditor;
 import imgui.extension.texteditor.TextEditorLanguageDefinition;
 import imgui.flag.ImGuiButtonFlags;
 import imgui.flag.ImGuiCond;
+import imgui.flag.ImGuiMouseButton;
 import imgui.flag.ImGuiWindowFlags;
 import imgui.type.ImBoolean;
 import org.opennars.main.Debug;
@@ -88,6 +90,7 @@ public class InputTextEdit {
             "<小特 --> 鸟>.",
             "<鸟 --> 动物>.",
             "",
+            "",
         });
     }
 
@@ -129,21 +132,8 @@ public class InputTextEdit {
                     ImGui.endMenu();
                 }
                 if (ImGui.beginMenu("Run")) {
-                    if (ImGui.menuItem("add text to nars input")) {
-                        String textToSave = EDITOR.getText();
-                        String[] lines = textToSave.split("\n");
-                        for (String line : lines) {
-                            if (line != null && !line.equals("")) {
-                                try {
-                                    MainGame.nar.addInput(line);
-                                } catch (Exception ex) {
-                                    if (Debug.DETAILED) {
-                                        throw new IllegalStateException("error parsing:" + line, ex);
-                                    }
-                                    System.out.println("parsing error");
-                                }
-                            }
-                        }
+                    if (ImGui.menuItem("Add Text To NARS Input")) {
+                        play();
                     }
                     ImGui.endMenu();
                 }
@@ -151,17 +141,32 @@ public class InputTextEdit {
                 ImGui.endMenuBar();
             }
 
-            int cposX = EDITOR.getCursorPositionLine();
-            int cposY = EDITOR.getCursorPositionColumn();
-
-//            String overwrite = EDITOR.isOverwrite() ? "Ovr" : "Ins";
-//            String canUndo = EDITOR.canUndo() ? "*" : " ";
-//
-//            ImGui.text(cposX + "/" + cposY + " " + EDITOR.getTotalLines() + " lines | " + overwrite + " | " + canUndo);
+            if(ImGui.arrowButton("Play", ImGuiMouseButton.Right)){
+                play();
+            }
+            ImGui.sameLine(); ImGui.text("Add Text To NARS Input");
 
             EDITOR.render("TextEditor");
             MainGame.imGuiHover = ImGui.isAnyItemHovered() || ImGui.isWindowHovered();
             ImGui.end();
+        }
+    }
+
+    private static void play() {
+        String textToSave = EDITOR.getText();
+        String[] lines = textToSave.split("\n");
+        for (String line : lines) {
+            if (line != null && !line.equals("")) {
+                try {
+                    MainGame.nar.addInput(line);
+                } catch (Exception ex) {
+                    if (Debug.DETAILED) {
+                        throw new IllegalStateException("error parsing:" + line, ex);
+                    }
+                    System.out.println("parsing error");
+                }
+                if(!Settings.renderSetting.AutoRender.get()) GUI.refresh3DView();
+            }
         }
     }
 }

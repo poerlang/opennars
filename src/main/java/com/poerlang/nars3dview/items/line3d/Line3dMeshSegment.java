@@ -61,7 +61,7 @@ public class Line3dMeshSegment {
         Vector3 dd = point1.sub(point2);
         cross.set(dd).crs(this.direction);
 
-        this.cross.setLength(Settings.lineSetting.lineWidth[0] * 0.5f);
+        this.cross.setLength(Settings.lineSetting.lineWidth.get() * 0.5f);
 
         a.set(start);
         a.add(cross);

@@ -128,18 +128,15 @@ public class GUI extends Application {
             if(!Settings.renderSetting.AutoRender.get()){
                 if(ImGui.arrowButton("Refresh Concepts in 3D View",1)){
                     nar.stop();
-                    View3dRefresh.refresh3DView();
+                    View3dRefresh.refresh3DView(true);
                 }
                 ImGui.sameLine(); ImGui.text("Refresh Concepts in 3D View");
             }else{
                 View3dRefresh.refreshCountDown++;
-                if(View3dRefresh.refreshCountDown%2==0){ //refresh once in 2 frame
-                    if( !Objects.equals(View3dRefresh.lastCycleNum, nar.cycle) ) {
-                        View3dRefresh.refresh3DView();
-                    }
-                }
+                View3dRefresh.refresh3DView();
             }
             ImGui.sliderFloat("Refresh Percentage", Settings.renderSetting.refreshPercentage.getData(),0,1,"%.2f %");
+            ImGui.sliderInt("Max 3d object", Settings.renderSetting.maxConceptIn3dView.getData(),1,99999);
             ImGui.separator();
         }else{
             ImGui.text("Concept Number: 0");
@@ -152,7 +149,7 @@ public class GUI extends Application {
         //第二个窗口，用来设置线宽、颜色等：
         ImGui.setNextWindowPos(windowAPos.x,windowAPos.y+windowASize.y+20, ImGuiCond.Always);
         ImGui.begin("3D View Setting", ImGuiWindowFlags.AlwaysAutoResize);
-        ImGui.sliderFloat("Line3d Width", Settings.lineSetting.lineWidth, 0, 5);
+        ImGui.sliderFloat("Line3d Width", Settings.lineSetting.lineWidth.getData(), 0, 5);
         ImGui.text("Line3d Normal Color:");
         ImGui.colorEdit4("Normal Start Point", Settings.lineSetting.normalStartColor.data);
         ImGui.colorEdit4("Normal End Point", Settings.lineSetting.normalEndColor.data);

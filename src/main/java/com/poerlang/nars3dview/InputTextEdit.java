@@ -129,16 +129,12 @@ public class InputTextEdit {
                 if (ImGui.menuItem("Paste", "Ctrl-V", ImGui.getClipboardText() != null)) {
                     EDITOR.paste();
                 }
-
-                ImGui.endMenu();
-            }
-            if (ImGui.beginMenu("Run")) {
-                if (ImGui.menuItem("Add Text To NARS Input")) {
+                if (ImGui.menuItem("Send Text To NARS Channel")) {
                     play();
                 }
+
                 ImGui.endMenu();
             }
-
             ImGui.endMenuBar();
         }
 
@@ -166,7 +162,7 @@ public class InputTextEdit {
                 try {
                     nar.addInput(line);
                     nar.cycles(Settings.narsSetting.cycleAfterInput.get());
-                    if (!Settings.renderSetting.AutoRender.get()) View3dRefresh.refresh3DView();
+                    if (!Settings.renderSetting.AutoRender.get()) View3dRefresh.refresh3DView(true);
                 } catch (Exception ex) {
                     if (Debug.DETAILED) {
                         throw new IllegalStateException("error parsing:" + line, ex);

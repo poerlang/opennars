@@ -106,11 +106,11 @@ public class GUI extends Application {
             }else{
                 if(ImGui.button("Cycle NARS")){
                     waitCountToShowCycle = 10;
-                    nar.cycles(Settings.narsSetting.step[0]);
+                    nar.cycles(Settings.narsSetting.step.get());
                 }
                 ImGui.sameLine(); ImGui.textColored(0.6f,0.6f,0.6f,1,"NARS has stopped "+ FontAwesomeIcons.Snowflake);
             }
-            ImGui.sliderInt("Cycle n Step", Settings.narsSetting.step, 1,50);
+            ImGui.sliderInt("Cycle n Step", Settings.narsSetting.step.getData(), 1,50);
             ImGui.text("Test File: "); ImGui.sameLine(); ImGui.textColored(0.6f,0.6f,0.6f,1,testFile);
             ImGui.separator();
 

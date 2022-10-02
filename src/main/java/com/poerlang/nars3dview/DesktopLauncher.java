@@ -11,7 +11,7 @@ public class DesktopLauncher {
 		config.setBackBufferConfig(8,8,8,8,16,0,samples);
 		config.setForegroundFPS(60);
 		config.setWindowSizeLimits(1600,800,99999,99999);
-		config.setTitle("NARS 3D Viewer");
+		config.setTitle("NARS 3D View");
 		new Lwjgl3Application(new MainGame(), config);
 	}
 }

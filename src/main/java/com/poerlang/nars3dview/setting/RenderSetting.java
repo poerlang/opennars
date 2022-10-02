@@ -8,4 +8,7 @@ public class RenderSetting {
     public ImBoolean AutoRender = new ImBoolean(true);
     public ImFloat refreshPercentage = new ImFloat(1f);
     public ImInt maxConceptIn3dView = new ImInt(1000);
+
+    public ImInt levelThreshold = new ImInt(50);
+    public ImFloat priorityThreshold = new ImFloat(0.01f);
 }

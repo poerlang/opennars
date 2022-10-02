@@ -30,6 +30,7 @@ import javax.xml.parsers.ParserConfigurationException;
 import java.io.*;
 import java.lang.reflect.InvocationTargetException;
 import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.text.ParseException;
 import org.opennars.language.Term;
 
@@ -170,7 +171,7 @@ public class Shell {
      * non-static equivalent to {@link #main(String[])} : finish to completion from an addInput file
      */
     public void run(final String[] args) {
-        Charset charset = Charset.forName("UTF-8");
+        Charset charset = StandardCharsets.UTF_8;
         final TextOutputHandler output = new TextOutputHandler(nar, new PrintWriter(out, true, charset));
         output.setErrors(true);
         output.setErrorStackTrace(true);

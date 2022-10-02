@@ -79,7 +79,7 @@ public class Item3d {
         return type==Item3dType.MESH;
     }
 
-    private void toNone() {
+    public void toNone() {
         init3d();
         if(type==Item3dType.LINE && line3d!=null){
             Pools.get(Line3d.class).free(line3d);
@@ -173,8 +173,10 @@ public class Item3d {
             mesh3d.meshModelInstance.transform.getTranslation(position);
         }else if(isLine()){
             position.set(line3d.getCenter());
-        }else{
+        }else if(isPlane()){
             position.set(plane3d.decal.getPosition());
+        }else{
+            position.set(myPosition);
         }
     }
     public float getSize() {
@@ -240,5 +242,10 @@ public class Item3d {
             mesh3d.meshModelInstance.transform.setTranslation(myPosition);
         }
         change = false;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        return this.uid == ((Item3d)obj).uid;
     }
 }

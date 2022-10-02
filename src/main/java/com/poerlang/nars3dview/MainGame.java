@@ -1,5 +1,5 @@
 package com.poerlang.nars3dview;
-
+//提醒：启动时在 build and run 参数中添加： -Dfile.encoding=UTF-8
 import com.badlogic.gdx.*;
 import com.badlogic.gdx.graphics.*;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
@@ -26,17 +26,20 @@ import imgui.extension.implot.ImPlot;
 import imgui.flag.ImGuiConfigFlags;
 import imgui.gl3.ImGuiImplGl3;
 import imgui.glfw.ImGuiImplGlfw;
-import org.checkerframework.checker.units.qual.C;
 import org.lwjgl.glfw.GLFW;
 import org.lwjgl.glfw.GLFWErrorCallback;
 import org.lwjgl.opengl.GL;
 
+import java.io.PrintWriter;
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.util.*;
 
 import com.badlogic.gdx.backends.lwjgl3.Lwjgl3Graphics;
 
 import static com.badlogic.gdx.Gdx.files;
 import static com.poerlang.nars3dview.GUI.initFonts;
+import static java.lang.System.out;
 import static org.lwjgl.glfw.GLFW.glfwPollEvents;
 import org.opennars.entity.*;
 import org.opennars.main.Nar;
@@ -69,6 +72,14 @@ public class MainGame extends InputAdapter implements ApplicationListener {
     private Long windowHandle = 0l;
     private ArrayList<Vector3> list = new ArrayList<Vector3>(3);
     private int printNum;
+    public static PrintWriter utf8Printer;
+    static {
+        Charset charset = StandardCharsets.UTF_8;
+        utf8Printer = new PrintWriter(out, true, charset);
+    }
+    public static void log(Object s){
+        utf8Printer.println(s);
+    }
 
     @Override
     public void create() {
@@ -135,7 +146,7 @@ public class MainGame extends InputAdapter implements ApplicationListener {
         ImPlot.createContext();
 
         final long backupWindowPtr = GLFW.glfwGetCurrentContext();
-        System.out.println(backupWindowPtr);
+        out.println(backupWindowPtr);
     }
     private void renderGUI() {
 
@@ -158,8 +169,11 @@ public class MainGame extends InputAdapter implements ApplicationListener {
         glfwPollEvents();
     }
 
+    public static final Map<Long, Item3d> check_for_remove = new HashMap();
     public static Item3d add(Item3d item3d) {
-        instances.add(item3d);
+        if(!instances.contains(item3d,false)){
+            instances.add(item3d);
+        }
         return item3d;
     }
     public static void clearInstances() {
@@ -196,6 +210,7 @@ public class MainGame extends InputAdapter implements ApplicationListener {
         modelBatch.begin(cam);
         for (final Item3d instance : instances) {
             if (isVisible(cam, instance)) {
+                check_for_remove.put(instance.uid,instance);
                 visibles.add(instance);
                 if (instance.isMesh()){
                     modelBatch.render(instance.mesh3d.meshModelInstance, environment);
@@ -230,7 +245,7 @@ public class MainGame extends InputAdapter implements ApplicationListener {
 
     private String getTermString(Item3d selectItem) {
         if(selectItem instanceof Concept){
-            return selectItem.toString();
+            return ((Concept) selectItem).getTerm().toString();
         }else if(selectItem instanceof TermLink){
             return ((TermLink) selectItem).getTarget().toString();
         }
@@ -245,7 +260,7 @@ public class MainGame extends InputAdapter implements ApplicationListener {
             // billboarding for ortho cam :)
             // dir.set(-camera.direction.x, -camera.direction.y, -camera.direction.z);
             // decal.setRotation(dir, Vector3.Y);
-
+            item3d.plane3d.updateSize();
             // billboarding for perspective cam
             decal.lookAt(cam.position, cam.up);
 

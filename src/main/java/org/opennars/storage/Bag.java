@@ -23,6 +23,8 @@
  */
 package org.opennars.storage;
 
+import com.badlogic.gdx.utils.Array;
+import org.opennars.entity.Concept;
 import org.opennars.entity.Item;
 import java.io.Serializable;
 import java.util.*;
@@ -318,5 +320,15 @@ public class Bag<Type extends Item<K>,K> implements Serializable, Iterable<Type>
     @Override
     public Iterator<Type> iterator() {
         return nameTable.values().iterator();
+    }
+
+    public void getLevelAbove(int showLevel, Array<Concept> tmp_instances) {
+        for (int i = TOTAL_LEVEL; i >= showLevel; i--) {
+            if (!emptyLevel(i - 1)) {
+                for (int j = 0; j < itemTable.get(i - 1).size(); j++) {
+                    tmp_instances.add((Concept) itemTable.get(i - 1).get(j));
+                }
+            }
+        }
     }
 }

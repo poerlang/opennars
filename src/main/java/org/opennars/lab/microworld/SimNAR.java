@@ -1,28 +1,56 @@
-package nars.lab.microworld;
+/**
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+package org.opennars.lab.microworld;
 
-import nars.storage.Memory;
-import nars.main.NAR;
-//import nars.nal.nal8.Operation;
-//import nars.nal.nal8.operator.SyncOperator;
-//import nars.nar.Default;
-//import nars.task.Task;
+import org.opennars.lab.metric.MetricReporter;
+import org.opennars.storage.Memory;
+import org.opennars.main.Nar;
+//import org.opennars.nal.nal8.Operation;
+//import org.opennars.nal.nal8.operator.SyncOperator;
+//import org.opennars.nar.Default;
+//import org.opennars.task.Task;
 import processing.core.PApplet;
 import processing.core.PImage;
 import processing.event.MouseEvent;
 
 import java.awt.*;
-import java.io.File;
+import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.List;
-import nars.entity.Task;
-import nars.gui.NARSwing;
-import nars.language.Term;
-import nars.operator.Operation;
-import nars.operator.Operator;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import org.opennars.entity.Concept;
+import org.opennars.entity.Sentence;
+import org.opennars.entity.Task;
+import org.opennars.gui.NARSwing;
+import org.opennars.interfaces.Timable;
+import org.opennars.io.Narsese;
+import org.opennars.io.Parser;
+import org.opennars.language.Term;
+import org.opennars.operator.Operation;
+import org.opennars.operator.Operator;
+import org.opennars.util.test.ConceptMonitor;
 
 public class SimNAR extends Frame {
 
-    public SimNAR() {
+    public MetricReporter metricReporter;
+
+    public SimNAR() throws UnknownHostException {
+        metricReporter = new MetricReporter();
+        metricReporter.connect("127.0.0.1", 8125);
+
         String[] args = {"Microworld"};
         MyPapplet mp = new MyPapplet ();
         mp.setSize(800,600);
@@ -236,15 +264,16 @@ public class SimNAR extends Frame {
         class Hai
         {
             Hai(){}
-            NAR nar;
-            int nActions = 3;
-            Hai(int nactions,int nstates)
+            Nar nar;
+            int nActions = 4;
+            Hai(int nactions,int nstates) throws Exception
             {
                 this.nActions = nactions; //for actions since we allow the same randomization phase as in QL
-                nar = new NAR();
+                nar = new Nar();
                 nar.memory.addOperator(new Right("^Right"));
                 nar.memory.addOperator(new Left("^Left"));
-                (nar.param).noiseLevel.set(0);
+                nar.memory.addOperator(new Forward("^Forward"));
+                nar.narParameters.VOLUME = 0;
                 new NARSwing(nar); 
                 //nar.start(0);
                 Memory m = nar.memory;
@@ -256,16 +285,29 @@ public class SimNAR extends Frame {
 
 
             int lastAction=0;
+            public class Forward extends Operator {
+                public Forward(String name) {
+                    super(name);
+                }
+
+                @Override
+                public List<Task> execute(Operation operation, Term[] args, Memory memory, Timable time) {
+                    lastAction = 3;
+                    memory.allowExecution = false;
+                    System.out.println("Nar decide forward");
+                    return null;
+                }
+            }
             public class Right extends Operator {
                 public Right(String name) {
                     super(name);
                 }
 
                 @Override
-                public List<Task> execute(Operation operation, Term[] args, Memory memory) {
+                public List<Task> execute(Operation operation, Term[] args, Memory memory, Timable time) {
                     lastAction = 1;
                     memory.allowExecution = false;
-                    System.out.println("NAR decide left");
+                    System.out.println("Nar decide left");
                     return null;
                 }
             }
@@ -275,10 +317,10 @@ public class SimNAR extends Frame {
                 }
 
                 @Override
-                public List<Task> execute(Operation operation, Term[] args, Memory memory) {
+                public List<Task> execute(Operation operation, Term[] args, Memory memory, Timable time) {
                     lastAction = 2;
                     memory.allowExecution = false;
-                    System.out.println("NAR decide right");
+                    System.out.println("Nar decide right");
                     return null;
                 }
             }
@@ -291,7 +333,8 @@ public class SimNAR extends Frame {
             {
                 for(int i=0;i<viewField.length;i++) {
                     if(viewField[i]>0.1f) {
-                        String s = "<{\""+String.valueOf(i)+"\"} --> [on]>. :|:"; // %"+String.valueOf(0.5f+0.5f*viewField[i])+"%";
+                        System.out.println(i);
+                        String s = "<{"+String.valueOf(i)+"} --> [on]>. :|:"; // %"+String.valueOf(0.5f+0.5f*viewField[i])+"%";
                         if(!lastInput.equals(s) || k%5 == 0) {
                             nar.addInput(s);
                         }
@@ -301,21 +344,94 @@ public class SimNAR extends Frame {
                 }
                 lastAction = 0;
                 k++;
-               if(k%2==0) {
-                   if(k%4 == 0) { //les priority than eating ^^
+               if(k%2==0) { //TODO add motivation module that handles current goals of "animals"
+                   if(k%10 == 0) { //les priority than eating ^^
                         nar.addInput("<{SELF} --> [healthy]>! :|:");
+                   } else {
+                        nar.addInput("<{SELF} --> [satisfied]>! :|:");
                    }
-                   nar.addInput("<{SELF} --> [replete]>! :|:");
                    //System.out.println("food urge input");
                 }
+               
+               //nar.addInput("<(&/,<{0} --> [on]>,+1,(^Right,{SELF}),+1) =/> <{SELF} --> [satisfied]>>.");
+               //nar.addInput("<(&/,<{2} --> [on]>,+1,(^Left,{SELF}),+1) =/> <{SELF} --> [satisfied]>>.");
+               
+               boolean verbose = true;
+                if(k%4 == 0) {
+                    //right
+                    {
+                        System.out.println("CORRECT:");
+                        Sentence hypo_left_rep = ConceptMonitor.strongestPrecondition(nar, "<{SELF} --> [satisfied]>",
+                                "<(&/,<{0} --> [on]>,+1,(^Right,{SELF}),+1) =/> <{SELF} --> [satisfied]>>");
+                        if(hypo_left_rep != null && verbose) {
+                            System.out.println("HypLeftRep: " + hypo_left_rep.truth);
+                        }
+
+                        Sentence hypo_right_rep = ConceptMonitor.strongestPrecondition(nar, "<{SELF} --> [satisfied]>",
+                                "<(&/,<{2} --> [on]>,+12,(^Left,{SELF}),+13) =/> <{SELF} --> [satisfied]>>");
+                        if(hypo_right_rep != null && verbose) {
+                            System.out.println("HypRightRep: " + hypo_right_rep.truth);
+                        }
+                    }
+                    System.out.println("WRONG:");
+                    //wrong action
+                    {
+                        Sentence hypo_left_rep = ConceptMonitor.strongestPrecondition(nar, "<{SELF} --> [satisfied]>",
+                                "<(&/,<{0} --> [on]>,+1,(^Left,{SELF}),+1) =/> <{SELF} --> [satisfied]>>");
+                        if(hypo_left_rep != null && verbose) {
+                            System.out.println("HypLeftRepWrongA: " + hypo_left_rep.truth);
+                        }
+
+                        Sentence hypo_right_rep = ConceptMonitor.strongestPrecondition(nar, "<{SELF} --> [satisfied]>",
+                                "<(&/,<{2} --> [on]>,+12,(^Right,{SELF}),+13) =/> <{SELF} --> [satisfied]>>");
+                        if(hypo_right_rep != null && verbose) {
+                            System.out.println("HypRightRepWrongA: " + hypo_right_rep.truth);
+                        }
+                    }
+                    //Wrong goal
+                    {
+
+                        Sentence hypo_left_heal = ConceptMonitor.strongestPrecondition(nar, "<{SELF} --> [satisfied]>",
+                                "<(&/,<{3} --> [on]>,+1,(^Right,{SELF}),+1) =/> <{SELF} --> [satisfied]>>");
+                        if(hypo_left_heal != null && verbose) {
+                            System.out.println("HypLeftHealWrongG: " + hypo_left_heal.truth);
+                        }
+
+                        Sentence hypo_right_heal = ConceptMonitor.strongestPrecondition(nar, "<{SELF} --> [satisfied]>",
+                                "<(&/,<{5} --> [on]>,+12,(^Left,{SELF}),+13) =/> <{SELF} --> [satisfied]>>");
+                        if(hypo_right_heal != null && verbose) {
+                            System.out.println("HypRightHealWrongG: " + hypo_right_heal.truth);
+                        }
+                    }
+                    //Wrong goal wrong action
+                    {
+
+                        Sentence hypo_left_heal = ConceptMonitor.strongestPrecondition(nar, "<{SELF} --> [satisfied]>",
+                                "<(&/,<{3} --> [on]>,+1,(^Left,{SELF}),+1) =/> <{SELF} --> [satisfied]>>");
+                        if(hypo_left_heal != null && verbose) {
+                            System.out.println("HypLeftHealWrongWrong: " + hypo_left_heal.truth);
+                        }
+
+                        Sentence hypo_right_heal = ConceptMonitor.strongestPrecondition(nar, "<{SELF} --> [satisfied]>",
+                                "<(&/,<{5} --> [on]>,+12,(^Right,{SELF}),+13) =/> <{SELF} --> [satisfied]>>");
+                        if(hypo_right_heal != null && verbose) {
+                            System.out.println("HypRightHealWrongWrong: " + hypo_right_heal.truth);
+                        }
+                    }
+                }
+               
                 if(reward > 0) {
+                    counterAteGood++;
                     System.out.println("good mr_nars");
-                    nar.addInput("<{SELF} --> [replete]>. :|:");
+                    nar.addInput("<{SELF} --> [satisfied]>. :|:");
                 }
                 if(reward < 0) {
-                    System.out.println("bad mr_nars");
+                    counterAteBad++;
                     lasthealthy = k;
-                    //nar.addInput("(--,<{SELF} --> [good]>). :|:");   
+                    System.out.println("bad mr_nars");
+                    nar.addInput("<{SELF} --> [satisfied]>. :|: %0%");
+                    nar.addInput("<{SELF} --> [healthy]>. :|: %0%");
+                    //nar.addInput("(--,<{SELF} --> [satisfied]>). :|:");   
                 }
                 
                 if(k - lasthealthy > 200 && k%20 == 0) {
@@ -325,17 +441,34 @@ public class SimNAR extends Frame {
                 
                 nar.cycles(10);
 
-                if(lastAction==0 && random(1.0f)<Alpha) { //if NAR hasn't decided chose a random action
+                if(lastAction==0 && random(1.0f)<Alpha) { //if Nar hasn't decided chose a random action
                     lastAction = (int)random((float)nActions);
+                    Concept left = null;
+                    Concept right = null;
+                    Concept forward = null;
+                    try {
+                        left = nar.memory.concept(new Narsese(nar).parseTerm("Left({SELF})")); //refine API in the future
+                        right = nar.memory.concept(new Narsese(nar).parseTerm("Right({SELF})")); //innate motivation plugin
+                        forward = nar.memory.concept(new Narsese(nar).parseTerm("Forward({SELF})")); //innate motivation plugin
+                    } catch (Parser.InvalidInputException ex) {              //with for instance battery level etc. and their state?
+                        Logger.getLogger(Pong.class.getName()).log(Level.SEVERE, null, ex);
+                    }
                     if(lastAction == 1) {
-                        //System.out.println("random left");
+                        if(right != null && !right.allowBabbling) {
+                            lastAction = 0;
+                            return 0;
+                        }
                         nar.addInput("Right({SELF}). :|:");
-                       // nar.addInput("Left({SELF}). :|:");
                     }
                     if(lastAction == 2) {
-                        //System.out.println("random right");
+                        if(left != null && !left.allowBabbling) {
+                            lastAction = 0;
+                            return 0;
+                        }
                         nar.addInput("Left({SELF}). :|:");
-                       /// nar.addInput("Right({SELF}). :|:");
+                    }
+                    if(lastAction == 3) {
+                        nar.addInput("Forward({SELF}). :|:");
                     }
                 }
 
@@ -407,7 +540,7 @@ public class SimNAR extends Frame {
 
         void hsim_ObjectTask(Obj oi)
         {
-            oi.v=0;
+            //oi.v=0;
             if(oi.type==2)
             {
                 if(random(1)>0.5)
@@ -445,23 +578,31 @@ public class SimNAR extends Frame {
                 {
                     action=0;
                 }*/
+                oi.v *= 0.9f;
+                if(action==3)
+                {
+                    oi.v=Math.min(15.0f, oi.v+10.0f); //++
+                    //oi.v=5.0f;
+                    //mem.ProcessingInteract(oi.x,oi.y,1.0,10.0);
+                }
+                else
                 if(action==2)
                 {
-                    oi.a+=0.5f;
+                    oi.a+=0.5f; //++
                     //oi.v=5.0f;
                     //mem.ProcessingInteract(oi.x,oi.y,1.0,10.0);
                 }
                 else
                 if(action==1)
                 {
-                    oi.a-=0.5f;
+                    oi.a-=0.5f; //++
                     //oi.v=5.0f;
                     // mem.ProcessingInteract(oi.x,oi.y,1.0,10.0);
                 }
                 else
                 if(action==0)
                 {
-                    oi.v=10.0f;
+                    //oi.v=10.0f;
                     // mem.ProcessingInteract(oi.x,oi.y,1.0,10.0);
                 }
                 if(oi.x>width)
@@ -506,7 +647,8 @@ public class SimNAR extends Frame {
         }
         void hrend_DrawBegin()
         {
-            label1.text="opti index:"+((float)goods)/((float)bads)+ "FPS:"+frameRate;
+            label1.text="cntGood=" + counterAteGood + " cntBad="+counterAteBad + "    opti index:"+((float)goods)/((float)bads)+ "FPS:"+frameRate;
+fill(138,138,128);
             fill(138,138,128);
             pushMatrix();
             if(hamlib.Mode==hamlib.Hamlib3DMode)
@@ -593,15 +735,13 @@ public class SimNAR extends Frame {
             {
                 if(selected==null)
                 {
-                    for(int i=0;i<obj.size();i++)
-                    {
-                        Obj oi=(Obj)obj.get(i);
-                        float dx=oi.x-hnav.MouseToWorldCoordX(mouseX);
-                        float dy=oi.y-hnav.MouseToWorldCoordY(mouseY);
-                        float distance=sqrt(dx*dx+dy*dy);
-                        if(distance<oi.s)
-                        {
-                            selected=oi;
+                    for (Object anObj : obj) {
+                        Obj oi = (Obj) anObj;
+                        float dx = oi.x - hnav.MouseToWorldCoordX(mouseX);
+                        float dy = oi.y - hnav.MouseToWorldCoordY(mouseY);
+                        float distance = sqrt(dx * dx + dy * dy);
+                        if (distance < oi.s) {
+                            selected = oi;
                             hsim_ElemClicked(oi);
                             return;
                         }
@@ -641,7 +781,12 @@ public class SimNAR extends Frame {
                             float d=sqrt(dx*dx+dy*dy);
                             if(oi.type==0)
                             {
-                                float ati=atan2(dy,dx)+PI;
+                                float ati=hamlib.RadAngleRange(atan2(dy,dx)+PI);
+                                
+                                //if(d < viewdist) {
+                                //    System.out.println("objet: " + hamlib.RadAngleRange(ati));
+                                //    System.out.println("agent: " + oi.a);
+                               // }
                                 float diffi=hamlib.angleDiff(ati,oi.a);
                                 float diffi2=hamlib.angleDiff(ati,oi.a-visarea);
                                 float part=diffi/visarea;
@@ -663,8 +808,9 @@ public class SimNAR extends Frame {
                     float a=oi.a;
                     float cosa=cos(a);
                     float sina=sin(a);
-                    oi.x+=cosa*oi.v;
-                    oi.y+=sina*oi.v;
+                    oi.x+=cosa*oi.v; //++
+                    oi.y+=sina*oi.v; //++
+                    //oi.a +=0.01; //++
                     oi.x+=oi.vx;
                     oi.y+=oi.vy;
 
@@ -717,7 +863,7 @@ public class SimNAR extends Frame {
             Hsim_Custom(){}
         }
 
-        int nactions=3;
+        int nactions=4;
         int worldSize=800;
         PImage[] im=new PImage[10];
         Gui label1;
@@ -805,9 +951,8 @@ public class SimNAR extends Frame {
             float Integrate(float[] arr)
             {
                 float ret=0;
-                for(int i=0;i<arr.length;i++)
-                {
-                    ret+=arr[i];
+                for (float anArr : arr) {
+                    ret += anArr;
                 }
                 return ret;
             }
@@ -920,11 +1065,11 @@ public class SimNAR extends Frame {
                 mul=1;
             }
             float xrotrad, yrotrad;
-            yrotrad=(float)(hcam.yrot/180*PI);
-            xrotrad=(float)(hcam.xrot/180*PI);
-            hcam.xpos+=mul*(float)(hcam.speed*2*sin(yrotrad));
-            hcam.zpos-=mul*(float)(hcam.speed*2*cos(yrotrad));
-            hcam.ypos-=mul*(float)(hcam.speed*2*sin(xrotrad));
+            yrotrad= hcam.yrot/180*PI;
+            xrotrad= hcam.xrot/180*PI;
+            hcam.xpos+=mul* hcam.speed*2*sin(yrotrad);
+            hcam.zpos-=mul* hcam.speed*2*cos(yrotrad);
+            hcam.ypos-=mul* hcam.speed*2*sin(xrotrad);
         }
         void hcam_keyPressed()
         {
@@ -947,20 +1092,20 @@ public class SimNAR extends Frame {
             if(key=='s')
             {
                 float xrotrad,yrotrad;
-                yrotrad=(float)(hcam.yrot/180*PI);
-                xrotrad=(float)(hcam.xrot/180*PI);
-                hcam.xpos-=(float)(hcam.speed*sin(yrotrad));
-                hcam.zpos+=(float)(hcam.speed*cos(yrotrad)) ;
-                hcam.ypos+=(float)(hcam.speed*sin(xrotrad));
+                yrotrad= hcam.yrot/180*PI;
+                xrotrad= hcam.xrot/180*PI;
+                hcam.xpos-= hcam.speed*sin(yrotrad);
+                hcam.zpos+= hcam.speed*cos(yrotrad);
+                hcam.ypos+= hcam.speed*sin(xrotrad);
             }
             if(key=='w')
             {
                 float xrotrad, yrotrad;
-                yrotrad=(float)(hcam.yrot/180*PI);
-                xrotrad=(float)(hcam.xrot/180*PI);
-                hcam.xpos+=(float)(hcam.speed*sin(yrotrad));
-                hcam.zpos-=(float)(hcam.speed*cos(yrotrad));
-                hcam.ypos-=(float)(hcam.speed*sin(xrotrad));
+                yrotrad= hcam.yrot/180*PI;
+                xrotrad= hcam.xrot/180*PI;
+                hcam.xpos+= hcam.speed*sin(yrotrad);
+                hcam.zpos-= hcam.speed*cos(yrotrad);
+                hcam.ypos-= hcam.speed*sin(xrotrad);
             }
             if(key=='d')
             {
@@ -1107,28 +1252,24 @@ public class SimNAR extends Frame {
             }
             void mousePressed()
             {
-                for(int i=0;i<gui.size();i++)
-                {
-                    Gui g=((Gui)gui.get(i));
-                    if(mouseX>g.px && mouseX<g.px+g.sx && mouseY>g.py && mouseY<g.py+g.sy)
-                    {
-                        if(!g.bTextBox)
-                        {
+                for (Object aGui : gui) {
+                    Gui g = ((Gui) aGui);
+                    if (mouseX > g.px && mouseX < g.px + g.sx && mouseY > g.py && mouseY < g.py + g.sy) {
+                        if (!g.bTextBox) {
                             hgui_ElemEvent(g);
                         }
-                        selected=g;
+                        selected = g;
                     }
                 }
             }
             void Draw()
             {
-                for(int i=0;i<gui.size();i++)
-                {
-                    Gui g=((Gui)gui.get(i));
-                    fill(0,0,0);
-                    rect(g.px,g.py,g.sx,g.sy);
-                    fill(255,255,255);
-                    text(g.text,g.px+g.sx/2,g.py+g.sy/2);
+                for (Object aGui : gui) {
+                    Gui g = ((Gui) aGui);
+                    fill(0, 0, 0);
+                    rect(g.px, g.py, g.sx, g.sy);
+                    fill(255, 255, 255);
+                    text(g.text, g.px + g.sx / 2, g.py + g.sy / 2);
                 }
             }
         }
@@ -1293,7 +1434,7 @@ public class SimNAR extends Frame {
             boolean DrawField=false;
             Hai hai=null;
             Hsim_Custom custom=null;
-            Obj(Hsim_Custom customobj,Hai haiobj,int X,int Y,float A,float V,float Vx,float Vy,float S,int Type,int Hsim_eyesize)
+            Obj(Hsim_Custom customobj,Hai haiobj, int X, int Y, float A, float V,float Vx, float Vy, float S, int Type, int Hsim_eyesize)
             {
                 hai=haiobj;
                 custom=customobj;
@@ -1338,17 +1479,21 @@ public class SimNAR extends Frame {
             //mem.simulate_damping=0.90;
             //size(worldSize-200,worldSize-200);
             hamlib.Init(false);
-            im[0]=loadImage("."+File.separator+"nars_lab"+File.separator+"nars"+File.separator+"lab"+File.separator+"microworld"+File.separator+"agent.png");
-            im[1]=loadImage("."+File.separator+"nars_lab"+File.separator+"nars"+File.separator+"lab"+File.separator+"microworld"+File.separator+"food.png");
-            im[2]=loadImage("."+File.separator+"nars_lab"+File.separator+"nars"+File.separator+"lab"+File.separator+"microworld"+File.separator+"fire.png");
+            im[0]=loadImage("microworld/agent.png");
+            im[1]=loadImage("microworld/food.png");
+            im[2]=loadImage("microworld/fire.png");
             for(int i=0;i<1;i++)
             {
-                int SomSize=10;
-                Hai h=new Hai(nactions,SomSize);
-                //h.som=new Hsom(SomSize,Hsim_eyesize*2);
-                //h.som.Leaky=false;
-                test=new Obj(new Hsim_Custom(),h,(int)(padding+random(1)*(width-padding)),(int)(padding+random(1)*(height-padding)),random(1)*2*PI-PI,random(1),0,0,random(1)*5+20,0,Hsim_eyesize);
-                hsim.obj.add(test);
+                try {
+                    int SomSize=10;
+                    Hai h=new Hai(nactions,SomSize);
+                    //h.som=new Hsom(SomSize,Hsim_eyesize*2);
+                    //h.som.Leaky=false;
+                    test=new Obj(new Hsim_Custom(),h,(int)(padding+random(1)*(width-padding)),(int)(padding+random(1)*(height-padding)),random(1)*2*PI-PI,random(1),0,0,random(1)*5+20,0,Hsim_eyesize);
+                    hsim.obj.add(test);
+                } catch (Exception ex) {
+                    Logger.getLogger(SimNAR.class.getName()).log(Level.SEVERE, null, ex);
+                }
             }
             lastclicked=((Obj)hsim.obj.get(0));
             for(int i=0;i<5;i++)
@@ -1374,8 +1519,11 @@ public class SimNAR extends Frame {
 
     }
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws UnknownHostException {
         NARSwing.themeInvert();
         new SimNAR();
     }
+    
+    long counterAteGood = 0;
+    long counterAteBad = 0;
 }

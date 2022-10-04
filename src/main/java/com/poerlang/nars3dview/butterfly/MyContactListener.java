@@ -1,10 +1,8 @@
 package com.poerlang.nars3dview.butterfly;
 
 import com.badlogic.gdx.physics.bullet.collision.ContactListener;
-import com.badlogic.gdx.physics.bullet.collision.btCollisionObject;
-import com.badlogic.gdx.physics.bullet.collision.btCollisionObjectWrapper;
-import com.badlogic.gdx.physics.bullet.collision.btManifoldPoint;
 import com.badlogic.gdx.utils.Array;
+import com.poerlang.nars3dview.butterfly.game_objects.GameObject;
 
 public class MyContactListener extends ContactListener {
     @Override

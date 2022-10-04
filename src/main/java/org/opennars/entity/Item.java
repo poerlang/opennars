@@ -23,7 +23,7 @@
  */
 package org.opennars.entity;
 
-import com.poerlang.nars3dview.Item3d;
+import com.poerlang.nars3dview.items.Item3d;
 
 import java.io.Serializable;
 import java.util.Comparator;

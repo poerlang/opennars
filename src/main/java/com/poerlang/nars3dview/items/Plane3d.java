@@ -2,7 +2,6 @@ package com.poerlang.nars3dview.items;
 
 import com.badlogic.gdx.graphics.g3d.decals.Decal;
 import com.badlogic.gdx.utils.Pool;
-import com.poerlang.nars3dview.Item3d;
 import com.poerlang.nars3dview.setting.Settings;
 
 public class Plane3d implements Pool.Poolable {

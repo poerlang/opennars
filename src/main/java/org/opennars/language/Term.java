@@ -23,7 +23,7 @@
  */
 package org.opennars.language;
 
-import com.poerlang.nars3dview.Item3d;
+import com.poerlang.nars3dview.items.Item3d;
 import org.apache.commons.lang3.StringUtils;
 import org.opennars.inference.TemporalRules;
 import org.opennars.io.Symbols;

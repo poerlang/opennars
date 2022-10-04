@@ -1,0 +1,12 @@
+package com.poerlang.nars3dview.butterfly.game_objects;
+
+import com.badlogic.gdx.graphics.g3d.Model;
+import com.badlogic.gdx.physics.bullet.collision.btCollisionShape;
+
+public class Stone extends GameObject{
+    public final static short FLAG = 1 << 4;
+    public final static String NAME = "stone";
+    public Stone() {
+        super(NAME);
+    }
+}

@@ -1,6 +1,7 @@
 package com.poerlang.nars3dview;
 
 import com.badlogic.gdx.utils.Array;
+import com.poerlang.nars3dview.items.Item3d;
 import com.poerlang.nars3dview.setting.Settings;
 import org.opennars.entity.Concept;
 import org.opennars.entity.TermLink;

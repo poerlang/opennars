@@ -20,6 +20,7 @@ import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.viewport.ExtendViewport;
 import com.poerlang.nars3dview.butterfly.ButterflyMainGame;
 import com.poerlang.nars3dview.camera.MyCameraController;
+import com.poerlang.nars3dview.items.Item3d;
 import com.poerlang.nars3dview.items.line3d.Line3dMeshSegment;
 import imgui.ImGui;
 import imgui.ImGuiIO;

@@ -10,7 +10,6 @@ import com.badlogic.gdx.graphics.g3d.decals.CameraGroupStrategy;
 import com.badlogic.gdx.graphics.g3d.decals.Decal;
 import com.badlogic.gdx.graphics.g3d.decals.DecalBatch;
 import com.badlogic.gdx.graphics.g3d.environment.DirectionalLight;
-import com.badlogic.gdx.graphics.g3d.utils.CameraInputController;
 import com.badlogic.gdx.math.Intersector;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.math.collision.Ray;
@@ -19,6 +18,8 @@ import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.utils.Align;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.viewport.ExtendViewport;
+import com.poerlang.nars3dview.butterfly.ButterflyMainGame;
+import com.poerlang.nars3dview.camera.MyCameraController;
 import com.poerlang.nars3dview.items.line3d.Line3dMeshSegment;
 import imgui.ImGui;
 import imgui.ImGuiIO;
@@ -61,7 +62,7 @@ public class MainGame extends InputAdapter implements ApplicationListener {
     private String glslVersion = null;
     private ModelBatch modelBatch;
     private Environment environment;
-    private CameraInputController camController;
+    private MyCameraController camController;
     private Stage stage;
     private BitmapFont font;
     private Label label;
@@ -77,6 +78,9 @@ public class MainGame extends InputAdapter implements ApplicationListener {
         Charset charset = StandardCharsets.UTF_8;
         utf8Printer = new PrintWriter(out, true, charset);
     }
+
+    public static ButterflyMainGame butterflyMainGame;
+
     public static void log(Object s){
         utf8Printer.println(s);
     }
@@ -91,14 +95,14 @@ public class MainGame extends InputAdapter implements ApplicationListener {
         batch = new SpriteBatch();
         img = new Texture("task.png");
         cam = new PerspectiveCamera(67, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
-        cam.position.set(55f, 55f, 55f);
+        cam.position.set(11f, 11f, 11f);
         cam.lookAt(0, 0, 0);
         cam.near = 0.01f;
         cam.far = 300f;
         dbatch = new DecalBatch(new CameraGroupStrategy(cam));
         Item3d.cam = cam;
 
-        camController = new CameraInputController(cam);
+        camController = new MyCameraController(cam);
 
         extendViewport = new ExtendViewport(100, 10,99999,99999,cam);
         Gdx.input.setInputProcessor(new InputMultiplexer(this, camController));
@@ -116,6 +120,8 @@ public class MainGame extends InputAdapter implements ApplicationListener {
 //        line3d.setLinePos(mesh.getPos(),plane.getPos(),mesh.getSize(),plane.getSize());
 //        add(line3d);
 
+        butterflyMainGame = new ButterflyMainGame();
+        butterflyMainGame.init();
 
         initGUI();
         inst = this;
@@ -227,6 +233,8 @@ public class MainGame extends InputAdapter implements ApplicationListener {
 
         renderPlanes();
 
+        butterflyMainGame.render(modelBatch,environment);
+
         renderGUI();
 
         renderLabel();
@@ -294,6 +302,7 @@ public class MainGame extends InputAdapter implements ApplicationListener {
             selectItem = null;
             selectItem = getObject(screenX, screenY);
             if(selectItem != null){
+                out.println("sel: \n"+getTermString(selectItem)+"\n");
                 setSelected(selectItem);
             }else{
                 setSelected(null);
@@ -340,7 +349,7 @@ public class MainGame extends InputAdapter implements ApplicationListener {
         for (int i = 0; i < visibles.size(); ++i) {
 
             //先比较大致距离，如果太大，则直接跳过
-            final Item3d instance = instances.get(i);
+            final Item3d instance = visibles.get(i);
             instance.getCenter(position);
             float dist2 = ray.origin.dst2(position);
             if (distance >= 0f && dist2 > distance) continue;
@@ -373,6 +382,7 @@ public class MainGame extends InputAdapter implements ApplicationListener {
     @Override
     public void dispose() {
         batch.dispose();
+        butterflyMainGame.dispose();
         img.dispose();
         imGuiGl3.dispose();
         imGuiGlfw.dispose();

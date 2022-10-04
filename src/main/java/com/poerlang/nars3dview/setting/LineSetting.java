@@ -10,5 +10,5 @@ public class LineSetting{
     public Color selectStartColor = new Color(1,0,0,0.1f);
     public Color selectEndColor = new Color(1,0.3f,0,0.3f);
 
-    public ImFloat lineWidth = new ImFloat(0.128f);
+    public ImFloat lineWidth = new ImFloat(0.392f);
 }

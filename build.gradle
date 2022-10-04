@@ -42,6 +42,10 @@ dependencies {
     // https://mvnrepository.com/artifact/com.google.guava/guava
     implementation 'com.google.guava:guava:31.1-jre'
 
+    implementation "com.badlogicgames.gdx:gdx-bullet:1.11.0"
+
+    implementation "com.badlogicgames.gdx:gdx-bullet-platform:1.11.0:natives-desktop"
+
 }
 
 tasks.withType(JavaCompile) {

@@ -226,6 +226,7 @@ public class Item3d {
     }
 
     public boolean change;
+    static Vector3 offset = new Vector3(-55f, -55f, -55f);
     public void calcPos() {
         if(!change) return;
         if(isLine()){
@@ -235,6 +236,7 @@ public class Item3d {
         float r = 100f;
         float half = (float) (r*0.5);
         Vector3 vector3 = new Vector3((float) (Math.random() * r - half), (float) Math.random() * r - half, (float) Math.random() * r - half);
+        vector3.add(offset);
         myPosition.set(vector3);
         if(isPlane()){
             plane3d.decal.setPosition(vector3);

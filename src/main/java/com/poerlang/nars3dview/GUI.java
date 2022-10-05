@@ -124,8 +124,8 @@ public class GUI extends Application {
 
             ImGui.separator();
             ImGui.sliderFloat("Refresh Percentage", Settings.renderSetting.refreshPercentage.getData(),0,1,"%.6f %");
-            ImGui.sliderInt("level threshold", Settings.renderSetting.levelThreshold.getData(),1,100);
-            ImGui.sliderFloat("priority threshold", Settings.renderSetting.priorityThreshold.getData(),0,1f);
+            ImGui.sliderInt("Level Threshold", Settings.renderSetting.levelThreshold.getData(),1,100);
+            ImGui.sliderFloat("Priority Threshold", Settings.renderSetting.priorityThreshold.getData(),0,1f);
             ImGui.sliderInt("Max 3d object", Settings.renderSetting.maxConceptIn3dView.getData(),1,500);
             ImGui.sliderFloat("Concept vs Link", Settings.renderSetting.ConceptVsLink.getData(),0,1,"%.6f %");
             ImGui.separator();

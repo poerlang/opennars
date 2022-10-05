@@ -49,14 +49,18 @@ public class View3dRefresh {
                 priority_above_instances.add(concept);
             }
         }
+        int conceptLen = priority_above_instances.size;
         for (int i = 0; i < priority_above_instances.size; i++) {
             Concept a_instance = priority_above_instances.get(i);
-            if (max3dObjectCount >= max3dObject || maxConceptCount >= maxConcept) break;
+            if (max3dObjectCount >= max3dObject || maxConceptCount >= maxConcept) {
+                conceptLen = i;
+                break;
+            }
             addConceptTo3DView(a_instance);
             max3dObjectCount++;
             maxConceptCount++;
         }
-        for (int i = 0; i < priority_above_instances.size; i++) {
+        for (int i = 0; i < conceptLen; i++) {
             Concept a_instance = priority_above_instances.get(i);
             links.clear();
             int maxLink = Math.round(Settings.renderSetting.refreshPercentage.get() * a_instance.termLinks.size());

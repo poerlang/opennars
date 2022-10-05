@@ -123,13 +123,6 @@ public class GUI extends Application {
             ImGui.textColored(1f,0.8f,0.3f,1,nar.memory.concepts.size()+"");
 
             ImGui.separator();
-            ImGui.checkbox("Auto Refresh 3D View After Cycle", Settings.renderSetting.AutoRender);
-            if(!Settings.renderSetting.AutoRender.get()){
-                if(ImGui.arrowButton("Refresh Concepts in 3D View",1)){
-                    nar.stop();
-                }
-                ImGui.sameLine(); ImGui.text("Refresh Concepts in 3D View");
-            }
             ImGui.sliderFloat("Refresh Percentage", Settings.renderSetting.refreshPercentage.getData(),0,1,"%.6f %");
             ImGui.sliderInt("level threshold", Settings.renderSetting.levelThreshold.getData(),1,100);
             ImGui.sliderFloat("priority threshold", Settings.renderSetting.priorityThreshold.getData(),0,1f);

@@ -340,7 +340,7 @@ public class MainGame extends InputAdapter implements ApplicationListener {
             selectItem = null;
             selectItem = getObject(screenX, screenY);
             if(selectItem != null){
-                out.println("sel: \n"+getTermString(selectItem)+"\n"+selectItem.uid+"\n");
+                log("sel: \n"+getTermString(selectItem)+"\n"+selectItem.uid+"\n");
                 setSelected(selectItem);
             }else{
                 setSelected(null);

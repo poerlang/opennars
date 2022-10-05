@@ -11,4 +11,5 @@ public class RenderSetting {
 
     public ImInt levelThreshold = new ImInt(36);
     public ImFloat priorityThreshold = new ImFloat(0.01f);
+    public ImFloat ConceptVsLink = new ImFloat(0.3f);
 }

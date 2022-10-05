@@ -8,27 +8,26 @@ import org.opennars.entity.TermLink;
 import org.opennars.language.Term;
 import org.opennars.storage.Bag;
 
+import java.util.HashMap;
 import java.util.Map;
-import java.util.Objects;
 
 import static com.poerlang.nars3dview.MainGame.*;
 
 public class View3dRefresh {
 
-    public static int refreshCountDown = 0;
+    public static int refreshCountDown = 12;
     public static Long lastCycleNum = 0L;
+    public static boolean needRefresh3DView;
 
-    public static void refresh3DView() {
-        if (View3dRefresh.refreshCountDown % 2 == 0) { //refresh once in 2 frame
-            if (Objects.equals(View3dRefresh.lastCycleNum, nar.cycle)) {
-                return;
-            }
-        }
-        refresh3DView(true);
-    }
     static Array<Concept> level_above_instances = new Array<>();
     static Array<Concept> priority_above_instances = new Array<>();
-    public static void refresh3DView(Boolean now) {
+    static Array<Item3d> links = new Array<>();
+    public static void refresh3DView() {
+        if(refreshCountDown>0) return;
+        if(nar==null) return;
+
+        refreshCountDown = 32;
+
         level_above_instances.clear();
         priority_above_instances.clear();
 
@@ -42,27 +41,44 @@ public class View3dRefresh {
 
         MainGame.clearInstances();
 
+        log("maxConcept"+maxConcept);
+
         memoryBag.getLevelAbove(Settings.renderSetting.levelThreshold.get(),level_above_instances);
 
-        for (Concept concept : level_above_instances) {
+        for (int i = 0; i < level_above_instances.size; i++) {
+            Concept concept = level_above_instances.get(i);
             if(concept.getPriority() > Settings.renderSetting.priorityThreshold.get()) {
                 priority_above_instances.add(concept);
             }
         }
-        for (Concept a_instance : priority_above_instances) {
-            if (max3dObjectCount++ > max3dObject) break;
-            if (maxConceptCount++ > maxConcept) break;
+        log("==================================");
+        log(">>>"+priority_above_instances.size);
+        for (int i = 0; i < priority_above_instances.size; i++) {
+            Concept a_instance = priority_above_instances.get(i);
+            if (max3dObjectCount > max3dObject || maxConceptCount > maxConcept) break;
             addConceptTo3DView(a_instance);
+            max3dObjectCount++;
+            maxConceptCount++;
             // for (TaskLink taskLink : concept.getTaskLinkBag().getNameTable().values()) {
-            for (TermLink termLink : a_instance.termLinks) {
-                termLink.toLine();
-                MainGame.add(termLink);
-                check_for_remove.remove(termLink.uid);
-                if (max3dObjectCount++ > max3dObject) {
+            links.clear();
+            int maxLink = Math.round(Settings.renderSetting.refreshPercentage.get() * a_instance.termLinks.size());
+            log(maxLink);
+            a_instance.termLinks.getArray(maxLink, links);
+            for (int i1 = 0; i1 < links.size; i1++) {
+                TermLink termLink = (TermLink) links.get(i1);
+                if (max3dObjectCount > max3dObject) {
                     break;
                 }
                 Concept targetConcept = nar.memory.concept(termLink.getTarget());
-                if (targetConcept == null) continue;
+                if(targetConcept == null)
+                    continue;
+                if(targetConcept.isNone())
+                    continue;
+
+                termLink.toLine();
+                check_for_remove.remove(termLink.uid);
+                max3dObjectCount++;
+                MainGame.add(termLink);
                 // if(targetConcept.isNone()){
                 //    addConceptTo3DView(targetConcept);
                 //    if(max3dObjectCount++ > max3dObject){
@@ -74,11 +90,11 @@ public class View3dRefresh {
         }
         for (Map.Entry<Long, Item3d> entry_will_remove : check_for_remove.entrySet()) {
             entry_will_remove.getValue().toNone(); // 回收那些等级或优先度被降低且不在列表中的 item 的资源
-            log(entry_will_remove.getValue().toString() + "资源已经回收");
+//            log(entry_will_remove.getValue().toString() + "资源已经回收");
         }
         check_for_remove.clear();
     }
-
+    public static final Map<Long, Item3d> check_for_remove = new HashMap<>();
     public static void addConceptTo3DView(Item3d item3d) {
         check_for_remove.remove(item3d.uid);
         if(!item3d.isPlane()){

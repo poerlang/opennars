@@ -24,6 +24,7 @@
 package org.opennars.storage;
 
 import com.badlogic.gdx.utils.Array;
+import com.poerlang.nars3dview.items.Item3d;
 import org.opennars.entity.Concept;
 import org.opennars.entity.Item;
 import java.io.Serializable;
@@ -268,52 +269,7 @@ public class Bag<Type extends Item<K>,K> implements Serializable, Iterable<Type>
         mass -= (level + 1);
     }
 
-    /**
-     * Collect Bag content into a String for display
-     */
-    @Override
-    public String toString() {
-        StringBuffer buf = new StringBuffer(" ");
-	for (int i = TOTAL_LEVEL; i >= 0 ; i--) {
-            if (!emptyLevel(i - 1)) {
-                buf = buf.append("\n --- Level " + i + ":\n ");
-                for (int j = 0; j < itemTable.get(i - 1).size(); j++) {
-                    buf = buf.append(itemTable.get(i - 1).get(j).toString() + "\n ");
-                }
-            }
-        }
-        return buf.toString();
-    }
-    
-    /** TODO bad paste from preceding */
-    public String toStringLong() {
-        StringBuffer buf = new StringBuffer(" BAG " + getClass().getSimpleName() );
-        buf.append(" ").append( showSizes() );
-		for (int i = TOTAL_LEVEL; i >= 0; i--) {
-            if (!emptyLevel(i - 1)) {
-                buf = buf.append("\n --- LEVEL " + i + ":\n ");
-                for (int j = 0; j < itemTable.get(i - 1).size(); j++) {
-                    buf = buf.append(itemTable.get(i - 1).get(j).toStringLong() + "\n ");
-                }
-            }
-        }
-		buf.append(">>>> end of Bag").append( getClass().getSimpleName() );
-        return buf.toString();
-    }
-    
-    String showSizes() {
-        StringBuilder buf = new StringBuilder(" ");
-    	int levels = 0;
-    	for ( ArrayList<Type> items : itemTable) {
-            if ((items != null) && ! items.isEmpty()) {
-				levels++;
-				buf.append( items.size() ).append( " " );
-            }
-		}
-    	return "Levels: " + Integer.toString( levels ) + ", sizes: " + buf;
-    }
-    
-    public int size() { 
+    public int size() {
         return nameTable.size();
     }
 
@@ -327,6 +283,20 @@ public class Bag<Type extends Item<K>,K> implements Serializable, Iterable<Type>
             if (!emptyLevel(i - 1)) {
                 for (int j = 0; j < itemTable.get(i - 1).size(); j++) {
                     tmp_instances.add((Concept) itemTable.get(i - 1).get(j));
+                }
+            }
+        }
+    }
+    public void getArray(int max, Array<Item3d> tmp_instances) {
+        int count = 0;
+        for (int i = TOTAL_LEVEL; i > 0; i--) {
+            if (!emptyLevel(i - 1)) {
+                for (int j = 0; j < itemTable.get(i - 1).size(); j++) {
+                    tmp_instances.add(itemTable.get(i - 1).get(j));
+                    count++;
+                    if(count>=max){
+                        return;
+                    }
                 }
             }
         }

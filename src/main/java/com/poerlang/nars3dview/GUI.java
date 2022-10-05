@@ -109,7 +109,7 @@ public class GUI extends Application {
                 }
                 ImGui.sameLine(); ImGui.textColored(0.6f,0.6f,0.6f,1,"NARS has stopped "+ FontAwesomeIcons.Snowflake);
             }
-            ImGui.sliderInt("Cycle n Step", Settings.narsSetting.step.getData(), 1,50);
+            ImGui.sliderInt("Cycle n Step", Settings.narsSetting.step.getData(), 1,300);
             ImGui.text("Test File: "); ImGui.sameLine(); ImGui.textColored(0.6f,0.6f,0.6f,1,testFile);
             ImGui.separator();
 
@@ -127,17 +127,13 @@ public class GUI extends Application {
             if(!Settings.renderSetting.AutoRender.get()){
                 if(ImGui.arrowButton("Refresh Concepts in 3D View",1)){
                     nar.stop();
-                    View3dRefresh.refresh3DView(true);
                 }
                 ImGui.sameLine(); ImGui.text("Refresh Concepts in 3D View");
-            }else{
-                View3dRefresh.refreshCountDown++;
-                View3dRefresh.refresh3DView();
             }
             ImGui.sliderFloat("Refresh Percentage", Settings.renderSetting.refreshPercentage.getData(),0,1,"%.2f %");
             ImGui.sliderInt("level threshold", Settings.renderSetting.levelThreshold.getData(),1,100);
             ImGui.sliderFloat("priority threshold", Settings.renderSetting.priorityThreshold.getData(),0,1f);
-            ImGui.sliderInt("Max 3d object", Settings.renderSetting.maxConceptIn3dView.getData(),1,99999);
+            ImGui.sliderInt("Max 3d object", Settings.renderSetting.maxConceptIn3dView.getData(),1,500);
             ImGui.separator();
         }else{
             ImGui.text("Concept Number: 0");

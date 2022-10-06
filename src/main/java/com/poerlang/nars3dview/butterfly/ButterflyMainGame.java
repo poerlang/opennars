@@ -35,9 +35,15 @@ public class ButterflyMainGame {
         butterfly = new Butterfly();
         butterfly.body.setUserValue(instances.size);
         instances.add(butterfly);
-//        Environment3D.addRigidBody(butterfly.body, Butterfly.FLAG, Butterfly.FLAG |Food.FLAG | Stone.FLAG);
+        // Environment3D.addRigidBody(butterfly.body, Butterfly.FLAG, Butterfly.FLAG |Food.FLAG | Stone.FLAG);
         Environment3D.addRigidBody(butterfly.body);
         butterfly.init();
+
+        Food food = new Food();
+        food.body.setUserValue(instances.size);
+        instances.add(food);
+        Environment3D.addRigidBody(food.body);
+        food.init();
     }
 
     public void render(ModelBatch modelBatch, Environment environment) {

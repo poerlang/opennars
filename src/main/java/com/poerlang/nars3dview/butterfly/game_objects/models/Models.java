@@ -30,15 +30,15 @@ public class Models {
         BoxShapeBuilder.build(groundPart,26f, Ground.height, 26f);
 
         mb.node().id = "food";
-        MeshPartBuilder spherePart = mb.part("food", GL20.GL_TRIANGLES, VertexAttributes.Usage.Position | VertexAttributes.Usage.Normal, new Material(ColorAttribute.createDiffuse(Color.BLUE)));
+        MeshPartBuilder spherePart = mb.part("food", GL20.GL_TRIANGLES, VertexAttributes.Usage.Position | VertexAttributes.Usage.Normal, new Material(ColorAttribute.createEmissive(Color.BLUE)));
         SphereShapeBuilder.build(spherePart,1f, 1f, 1f, 10, 10);
 
         mb.node().id = "stone";
-        MeshPartBuilder boxPart = mb.part("stone", GL20.GL_TRIANGLES, VertexAttributes.Usage.Position | VertexAttributes.Usage.Normal, new Material(ColorAttribute.createDiffuse(Color.RED)));
+        MeshPartBuilder boxPart = mb.part("stone", GL20.GL_TRIANGLES, VertexAttributes.Usage.Position | VertexAttributes.Usage.Normal, new Material(ColorAttribute.createEmissive(Color.RED)));
         BoxShapeBuilder.build(boxPart,1f, 1f, 1f);
 
         mb.node().id = "butterfly";
-        MeshPartBuilder cone = mb.part("butterfly", GL20.GL_TRIANGLES, VertexAttributes.Usage.Position | VertexAttributes.Usage.Normal, new Material(ColorAttribute.createEmissive(Color.GRAY)));
+        MeshPartBuilder cone = mb.part("butterfly", GL20.GL_TRIANGLES, VertexAttributes.Usage.Position | VertexAttributes.Usage.Normal, new Material(ColorAttribute.createEmissive(Color.GOLD)));
         ConeShapeBuilder.build(cone,1f, 2f, 1f, 6);
         staticModel = mb.end();
 
@@ -46,6 +46,6 @@ public class Models {
         constructors.put("ground", new Constructor(staticModel, "ground", new btBoxShape(new Vector3(13f, 0.5f, 13f)),0f));
         constructors.put("food", new Constructor(staticModel, "food", new btSphereShape(0.5f),1f));
         constructors.put("stone", new Constructor(staticModel, "stone", new btBoxShape(new Vector3(0.5f, 0.5f, 0.5f)),1f));
-        constructors.put("butterfly", new Constructor(staticModel, "butterfly", new btBoxShape(new Vector3(1, 1, 1)),1.5f));
+        constructors.put("butterfly", new Constructor(staticModel, "butterfly", new btBoxShape(new Vector3(0.6f, 1f, 1)),1.5f));
     }
 }

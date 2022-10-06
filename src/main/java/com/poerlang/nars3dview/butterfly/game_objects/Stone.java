@@ -10,8 +10,5 @@ public class Stone extends GameObject{
     public final static String NAME = "stone";
     public Stone() {
         super(NAME);
-        body.setCollisionFlags(body.getCollisionFlags() | btCollisionObject.CollisionFlags.CF_CUSTOM_MATERIAL_CALLBACK);
-        body.setContactCallbackFlag(FLAG);
-        body.setContactCallbackFilter(Ground.FLAG);
     }
 }

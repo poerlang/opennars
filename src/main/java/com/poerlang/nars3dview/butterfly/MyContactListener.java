@@ -11,10 +11,10 @@ public class MyContactListener extends ContactListener {
     public boolean onContactAdded (int userValue0, int partId0, int index0, boolean match0, int userValue1, int partId1,
                                    int index1, boolean match1) {
         Array<GameObject> instances = ButterflyMainGame.instances;
-        if (match0)
-            ((ColorAttribute)instances.get(userValue0).materials.get(0).get(ColorAttribute.Emissive)).color.set(Color.GOLD);
-        if (match1)
-            ((ColorAttribute)instances.get(userValue1).materials.get(0).get(ColorAttribute.Emissive)).color.set(Color.GOLD);
+//        if (match0)
+//            ((ColorAttribute)instances.get(userValue0).materials.get(0).get(ColorAttribute.Emissive)).color.set(Color.GOLD);
+//        if (match1)
+//            ((ColorAttribute)instances.get(userValue1).materials.get(0).get(ColorAttribute.Emissive)).color.set(Color.GOLD);
         return true;
     }
 }

@@ -21,6 +21,8 @@ import com.badlogic.gdx.utils.Align;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.viewport.ExtendViewport;
 import com.poerlang.nars3dview.butterfly.ButterflyMainGame;
+import com.poerlang.nars3dview.butterfly.game_objects.GameObject;
+import com.poerlang.nars3dview.butterfly.game_objects.Ground;
 import com.poerlang.nars3dview.camera.MyCameraController;
 import com.poerlang.nars3dview.items.Item3d;
 import com.poerlang.nars3dview.items.Line3d;
@@ -133,18 +135,6 @@ public class MainGame extends InputAdapter implements ApplicationListener {
         Gdx.input.setInputProcessor(new InputMultiplexer(this, camController));
         cam.update();
 
-
-//        Item3d mesh = new Item3d().toMesh();
-//        add(mesh);
-//
-//        Item3d plane = new Item3d().toPlane();
-//        plane.setPos(new Vector3(5,0,0));
-//        add(plane);
-//
-//        Item3d line3d = new Item3d().toLine();
-//        line3d.setLinePos(mesh.getPos(),plane.getPos(),mesh.getSize(),plane.getSize());
-//        add(line3d);
-
         butterflyMainGame = new ButterflyMainGame();
         butterflyMainGame.init();
 
@@ -191,9 +181,7 @@ public class MainGame extends InputAdapter implements ApplicationListener {
         imGuiGlfw.newFrame();
         ImGui.newFrame();
 
-
         GUI.showGUI(); // 绘制界面
-
 
         ImGui.render();
         imGuiGl3.renderDrawData(ImGui.getDrawData());
@@ -242,7 +230,11 @@ public class MainGame extends InputAdapter implements ApplicationListener {
 
         shadowLight.begin(Vector3.Zero, cam.direction);
         shadowBatch.begin(shadowLight.getCamera());
-        shadowBatch.render(butterflyMainGame.butterfly);
+        for (GameObject instance : ButterflyMainGame.instances) {
+            if(instance instanceof Ground) continue;
+            shadowBatch.render(instance);
+        }
+
         shadowBatch.end();
         shadowLight.end();
 
@@ -253,8 +245,6 @@ public class MainGame extends InputAdapter implements ApplicationListener {
 
         refreshCountDown--;
         refresh3DView();
-
-
 
         modelBatch.begin(cam);
         for (final Item3d instance : instances) {
@@ -296,7 +286,7 @@ public class MainGame extends InputAdapter implements ApplicationListener {
 
     private void renderLabel() {
         stringBuilder.setLength(0);
-        stringBuilder.append("  刷新率: ").append(Gdx.graphics.getFramesPerSecond());
+        stringBuilder.append("  FPS: ").append(Gdx.graphics.getFramesPerSecond());
         stringBuilder.append("  Visible: ").append(visibles.size());
         stringBuilder.append("  Selected Item: ").append(selectItem!=null ? getTermString(selectItem) : "none");
         label.setText(stringBuilder);
@@ -318,14 +308,8 @@ public class MainGame extends InputAdapter implements ApplicationListener {
         for (int i = 0; i < plane3ds.size(); i++) {
             Item3d item3d = plane3ds.get(i);
             Decal decal = item3d.plane3d.decal;
-
-            // billboarding for ortho cam :)
-            // dir.set(-camera.direction.x, -camera.direction.y, -camera.direction.z);
-            // decal.setRotation(dir, Vector3.Y);
             item3d.plane3d.updateSize();
-            // billboarding for perspective cam
             decal.lookAt(cam.position, cam.up);
-
             dbatch.add(decal);
         }
         dbatch.flush();
@@ -356,7 +340,7 @@ public class MainGame extends InputAdapter implements ApplicationListener {
             selectItem = null;
             selectItem = getObject(screenX, screenY);
             if(selectItem != null){
-                log("sel: \n"+getTermString(selectItem)+"\n"+selectItem.uid+"\n");
+                log("selected item3d: \n"+getTermString(selectItem)+"\nuid: "+selectItem.uid+"\n");
                 setSelected(selectItem);
             }else{
                 setSelected(null);

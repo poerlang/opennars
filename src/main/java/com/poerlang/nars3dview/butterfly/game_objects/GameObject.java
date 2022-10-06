@@ -7,8 +7,6 @@ import com.badlogic.gdx.physics.bullet.collision.*;
 import com.badlogic.gdx.physics.bullet.dynamics.btRigidBody;
 import com.badlogic.gdx.physics.bullet.linearmath.btMotionState;
 import com.badlogic.gdx.utils.Disposable;
-import com.poerlang.nars3dview.BulletTest;
-import com.poerlang.nars3dview.butterfly.ButterflyMainGame;
 import com.poerlang.nars3dview.butterfly.game_objects.models.Models;
 
 class MyMotionState extends btMotionState {

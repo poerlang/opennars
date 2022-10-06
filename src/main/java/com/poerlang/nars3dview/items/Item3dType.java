@@ -1,4 +1,4 @@
-package com.poerlang.nars3dview;
+package com.poerlang.nars3dview.items;
 
 public enum Item3dType {
     NONE,

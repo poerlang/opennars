@@ -6,6 +6,9 @@ import com.badlogic.gdx.physics.bullet.collision.btCollisionObject;
 import com.badlogic.gdx.physics.bullet.dynamics.btRigidBody;
 
 public class Ground extends GameObject{
+
+    public final static float groundSize = 26f;
+    public final static float groundSizeHalf = groundSize * 0.5f;
     public final static short FLAG = 1 << 4;
     public final static String NAME = "ground";
     public static float height = 1f;

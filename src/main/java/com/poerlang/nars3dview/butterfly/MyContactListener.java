@@ -8,7 +8,8 @@ import com.poerlang.nars3dview.butterfly.game_objects.GameObject;
 
 public class MyContactListener extends ContactListener {
     @Override
-    public boolean onContactAdded (int userValue0, int partId0, int index0, boolean match0, int userValue1, int partId1,
+    public boolean onContactAdded (int userValue0, int partId0, int index0,
+                                   boolean match0, int userValue1, int partId1,
                                    int index1, boolean match1) {
         Array<GameObject> instances = ButterflyMainGame.instances;
 //        if (match0)

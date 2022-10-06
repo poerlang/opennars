@@ -9,7 +9,6 @@ import com.badlogic.gdx.graphics.g3d.Material;
 import com.badlogic.gdx.graphics.g3d.attributes.ColorAttribute;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.utils.Pools;
-import com.poerlang.nars3dview.Item3dType;
 
 import java.util.concurrent.atomic.AtomicLong;
 

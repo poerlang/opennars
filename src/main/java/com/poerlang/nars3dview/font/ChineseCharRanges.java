@@ -1,4 +1,4 @@
-package com.poerlang.nars3dview;
+package com.poerlang.nars3dview.font;
 public class ChineseCharRanges{
 	public static short[] ranges = {
 //		(short) 0,(short) 0,

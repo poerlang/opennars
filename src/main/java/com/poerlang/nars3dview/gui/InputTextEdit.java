@@ -1,17 +1,15 @@
-package com.poerlang.nars3dview;
+package com.poerlang.nars3dview.gui;
 
+import com.poerlang.nars3dview.MainGame;
 import com.poerlang.nars3dview.setting.Settings;
 import imgui.ImGui;
 import imgui.ImGuiViewport;
 import imgui.extension.texteditor.TextEditor;
 import imgui.extension.texteditor.TextEditorLanguageDefinition;
-import imgui.flag.ImGuiButtonFlags;
 import imgui.flag.ImGuiCond;
 import imgui.flag.ImGuiMouseButton;
 import imgui.flag.ImGuiWindowFlags;
-import imgui.type.ImBoolean;
 import org.opennars.main.Debug;
-import org.opennars.main.Nar;
 
 import java.util.HashMap;
 import java.util.Map;

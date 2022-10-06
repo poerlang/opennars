@@ -1,5 +1,7 @@
-package com.poerlang.nars3dview;
+package com.poerlang.nars3dview.gui;
 
+import com.poerlang.nars3dview.MainGame;
+import com.poerlang.nars3dview.font.ChineseCharRanges;
 import com.poerlang.nars3dview.font.FontAwesomeIcons;
 import com.poerlang.nars3dview.guiexamples.Extra;
 import com.poerlang.nars3dview.setting.Settings;

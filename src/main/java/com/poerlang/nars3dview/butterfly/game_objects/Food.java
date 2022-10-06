@@ -9,7 +9,7 @@ public class Food extends GameObject{
     public final static String NAME = "food";
     public Food() {
         super(NAME);
-        body.setFriction(0.5f);
+        body.setFriction(1.5f);
     }
     public void init() {
         body.setCollisionFlags(body.getCollisionFlags() | btCollisionObject.CollisionFlags.CF_CUSTOM_MATERIAL_CALLBACK);

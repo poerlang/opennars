@@ -28,6 +28,7 @@ import com.poerlang.nars3dview.items.Item3d;
 import com.poerlang.nars3dview.items.Line3d;
 import com.poerlang.nars3dview.items.Mesh3d;
 import com.poerlang.nars3dview.items.line3d.Line3dMeshSegment;
+import com.poerlang.nars3dview.gui.GUI;
 import imgui.ImGui;
 import imgui.ImGuiIO;
 import imgui.extension.implot.ImPlot;
@@ -46,7 +47,7 @@ import java.util.*;
 import com.badlogic.gdx.backends.lwjgl3.Lwjgl3Graphics;
 
 import static com.badlogic.gdx.Gdx.files;
-import static com.poerlang.nars3dview.GUI.initFonts;
+import static com.poerlang.nars3dview.gui.GUI.initFonts;
 import static com.poerlang.nars3dview.View3dRefresh.*;
 import static java.lang.System.out;
 import static org.lwjgl.glfw.GLFW.glfwPollEvents;
@@ -234,7 +235,6 @@ public class MainGame extends InputAdapter implements ApplicationListener {
             if(instance instanceof Ground) continue;
             shadowBatch.render(instance);
         }
-
         shadowBatch.end();
         shadowLight.end();
 

@@ -7,6 +7,8 @@ import com.badlogic.gdx.utils.Array;
 import com.poerlang.nars3dview.butterfly.game_objects.*;
 import com.poerlang.nars3dview.butterfly.game_objects.models.Models;
 
+import static com.poerlang.nars3dview.butterfly.game_objects.Ground.groundSize;
+
 public class ButterflyMainGame {
     public static Array<GameObject> instances;
 
@@ -32,6 +34,11 @@ public class ButterflyMainGame {
         Environment3D.addRigidBody(ground.body);
         ground.init();
 
+        createWall().setPos(0f,Ground.height*1.5f,groundSize*0.5f + Ground.height*0.56f).init();
+        createWall().setPos(0f,Ground.height*1.5f,-(groundSize*0.5f + Ground.height*0.56f)).init();
+        createWall().setAngle(90f).setPos(-(groundSize*0.5f + Ground.height*0.56f),Ground.height*1.5f,0).init();
+        createWall().setAngle(-90f).setPos((groundSize*0.5f + Ground.height*0.56f),Ground.height*1.5f,0).init();
+
         butterfly = new Butterfly();
         butterfly.body.setUserValue(instances.size);
         instances.add(butterfly);
@@ -44,6 +51,14 @@ public class ButterflyMainGame {
         instances.add(food);
         Environment3D.addRigidBody(food.body);
         food.init();
+    }
+
+    private Wall createWall() {
+        Wall wall = new Wall();
+        wall.body.setUserValue(instances.size);
+        instances.add(wall);
+        Environment3D.addRigidBody(wall.body);
+        return wall;
     }
 
     public void render(ModelBatch modelBatch, Environment environment) {

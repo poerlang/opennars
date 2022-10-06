@@ -38,14 +38,14 @@ public class GameObject extends ModelInstance implements Disposable {
         motionState.transform = transform;
         shape = Models.constructors.get(modelNodeName).shape;
         mass = Models.constructors.get(modelNodeName).mass;
-        if (mass > 0f)
+        if ( mass > 0f )
             shape.calculateLocalInertia(mass, localInertia);
         else
             localInertia.set(0, 0, 0);
         this.constructionInfo = new btRigidBody.btRigidBodyConstructionInfo(mass, null, shape, localInertia);
 
         body = new btRigidBody(constructionInfo);
-        if(mass>0){
+        if( mass > 0 ){
             body.setMotionState(motionState);
             body.proceedToTransform(transform);
         }
@@ -59,4 +59,12 @@ public class GameObject extends ModelInstance implements Disposable {
     }
 
     public void update(float delta) {}
+    public GameObject setAngle(float a){
+        transform.setFromEulerAngles(a,0,0);
+        return this;
+    }
+    public GameObject setPos(float x, float y, float z) {
+        transform.trn(x, y, z);
+        return this;
+    }
 }

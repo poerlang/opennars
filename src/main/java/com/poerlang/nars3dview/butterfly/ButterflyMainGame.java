@@ -2,9 +2,7 @@ package com.poerlang.nars3dview.butterfly;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.g3d.*;
-import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.physics.bullet.Bullet;
-import com.badlogic.gdx.physics.bullet.collision.*;
 import com.badlogic.gdx.utils.Array;
 import com.poerlang.nars3dview.butterfly.game_objects.*;
 import com.poerlang.nars3dview.butterfly.game_objects.models.Models;
@@ -18,6 +16,7 @@ public class ButterflyMainGame {
 
     private float spawnTimer;
     final static short ALL_FLAG = -1;
+    public Butterfly butterfly;
 
     public void init() {
 
@@ -27,14 +26,18 @@ public class ButterflyMainGame {
 
         instances = new Array<>();
 
-        GameObject ground = new Ground();
+        Ground ground = new Ground();
+        ground.body.setUserValue(instances.size);
         instances.add(ground);
+        Environment3D.addRigidBody(ground.body);
+        ground.init();
 
-        Butterfly butterfly = new Butterfly();
-        butterfly.angle(3);
+        butterfly = new Butterfly();
+        butterfly.body.setUserValue(instances.size);
         instances.add(butterfly);
-        butterfly.body.setCollisionFlags(butterfly.body.getCollisionFlags() | btCollisionObject.CollisionFlags.CF_CUSTOM_MATERIAL_CALLBACK);
-        Environment3D.addCollisionObject(butterfly.body, Butterfly.FLAG, (short) (Food.FLAG | Stone.FLAG));
+//        Environment3D.addRigidBody(butterfly.body, Butterfly.FLAG, Butterfly.FLAG |Food.FLAG | Stone.FLAG);
+        Environment3D.addRigidBody(butterfly.body);
+        butterfly.init();
     }
 
     public void render(ModelBatch modelBatch, Environment environment) {
@@ -43,30 +46,13 @@ public class ButterflyMainGame {
         for (GameObject obj : instances) {
             if (obj.moving) {
                 obj.update(delta);
-                obj.body.setWorldTransform(obj.transform);
             }
         }
-        Environment3D.checkCollision();
+        Environment3D.stepSimulation(delta, 5, 1f / 120f);
         // spawn(delta);
         for (ModelInstance instance : instances) {
             modelBatch.render(instance, environment);
         }
-    }
-
-    public void spawn(float delta) {
-        if ((spawnTimer -= delta) >= 0) {
-            return;
-        }
-        spawnTimer = 1.5f;
-        GameObject obj = Models.constructors.values[1 + MathUtils.random(Models.constructors.size - 2)].construct();
-        obj.moving = true;
-        obj.transform.setFromEulerAngles(MathUtils.random(360f), MathUtils.random(360f), MathUtils.random(360f));
-        obj.transform.trn(MathUtils.random(-2.5f, 2.5f), 9f, MathUtils.random(-2.5f, 2.5f));
-        obj.body.setWorldTransform(obj.transform);
-        obj.body.setUserValue(instances.size);
-        obj.body.setCollisionFlags(obj.body.getCollisionFlags() | btCollisionObject.CollisionFlags.CF_CUSTOM_MATERIAL_CALLBACK);
-        instances.add(obj);
-        Environment3D.addCollisionObject(obj.body, Food.FLAG, Ground.FLAG);
     }
 
     public void dispose() {

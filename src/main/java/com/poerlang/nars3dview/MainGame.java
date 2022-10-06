@@ -10,6 +10,8 @@ import com.badlogic.gdx.graphics.g3d.decals.CameraGroupStrategy;
 import com.badlogic.gdx.graphics.g3d.decals.Decal;
 import com.badlogic.gdx.graphics.g3d.decals.DecalBatch;
 import com.badlogic.gdx.graphics.g3d.environment.DirectionalLight;
+import com.badlogic.gdx.graphics.g3d.environment.DirectionalShadowLight;
+import com.badlogic.gdx.graphics.g3d.utils.DepthShaderProvider;
 import com.badlogic.gdx.math.Intersector;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.math.collision.Ray;
@@ -21,6 +23,8 @@ import com.badlogic.gdx.utils.viewport.ExtendViewport;
 import com.poerlang.nars3dview.butterfly.ButterflyMainGame;
 import com.poerlang.nars3dview.camera.MyCameraController;
 import com.poerlang.nars3dview.items.Item3d;
+import com.poerlang.nars3dview.items.Line3d;
+import com.poerlang.nars3dview.items.Mesh3d;
 import com.poerlang.nars3dview.items.line3d.Line3dMeshSegment;
 import imgui.ImGui;
 import imgui.ImGuiIO;
@@ -41,6 +45,7 @@ import com.badlogic.gdx.backends.lwjgl3.Lwjgl3Graphics;
 
 import static com.badlogic.gdx.Gdx.files;
 import static com.poerlang.nars3dview.GUI.initFonts;
+import static com.poerlang.nars3dview.View3dRefresh.*;
 import static java.lang.System.out;
 import static org.lwjgl.glfw.GLFW.glfwPollEvents;
 import org.opennars.entity.*;
@@ -82,8 +87,24 @@ public class MainGame extends InputAdapter implements ApplicationListener {
 
     public static ButterflyMainGame butterflyMainGame;
 
+    private boolean drawRay = false;
+    private DirectionalShadowLight shadowLight;
+    private ModelBatch shadowBatch;
+
     public static void log(Object s){
         utf8Printer.println(s);
+    }
+
+    static Item3d selone = null;
+    public static void setSel(String uidStr) {
+        for (Item3d visible : visibles) {
+            if (visible.uid == (Long.parseLong(uidStr))){
+                selone = visible;
+                rayTarget.meshModelInstance.transform.setTranslation(selone.getPos());
+                return;
+            }
+        }
+
     }
 
     @Override
@@ -91,7 +112,10 @@ public class MainGame extends InputAdapter implements ApplicationListener {
         createLabel();
         environment = new Environment();
         environment.set(new ColorAttribute(ColorAttribute.AmbientLight, 0.4f, 0.4f, 0.4f, 1f));
-        environment.add(new DirectionalLight().set(0.8f, 0.8f, 0.8f, -1f, -0.8f, -0.2f));
+        environment.add((shadowLight = new DirectionalShadowLight(1024, 1024, 30f, 30f, 1f, 100f)).set(0.3f, 0.3f, 0.3f, -1f, -.8f, -.2f));
+        environment.shadowMap = shadowLight;
+        shadowBatch = new ModelBatch(new DepthShaderProvider());
+
         modelBatch = new ModelBatch();
         batch = new SpriteBatch();
         img = new Texture("task.png");
@@ -126,7 +150,14 @@ public class MainGame extends InputAdapter implements ApplicationListener {
 
         initGUI();
         inst = this;
+
+        rayCopy = new Line3d();
+        rayTarget = new Mesh3d();
     }
+    static Mesh3d rayTarget;
+    static Line3d rayCopy;
+    static Vector3 rayCopyStart = new Vector3();
+    static Vector3 rayCopyEnd = new Vector3();
 
     private void initGUI() {
         GL.createCapabilities();
@@ -176,7 +207,6 @@ public class MainGame extends InputAdapter implements ApplicationListener {
         glfwPollEvents();
     }
 
-    public static final Map<Long, Item3d> check_for_remove = new HashMap();
     public static Item3d add(Item3d item3d) {
         if(!instances.contains(item3d,false)){
             instances.add(item3d);
@@ -207,12 +237,24 @@ public class MainGame extends InputAdapter implements ApplicationListener {
         extendViewport.apply();
 
         Gdx.gl.glViewport(0, 0, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
+        Gdx.gl.glClearColor(0, 0, 0, 1);
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT | GL20.GL_DEPTH_BUFFER_BIT);
+
+        shadowLight.begin(Vector3.Zero, cam.direction);
+        shadowBatch.begin(shadowLight.getCamera());
+        shadowBatch.render(butterflyMainGame.butterfly);
+        shadowBatch.end();
+        shadowLight.end();
 
         float deltaTime = Gdx.graphics.getDeltaTime();
 
         plane3ds.clear();
         visibles.clear();
+
+        refreshCountDown--;
+        refresh3DView();
+
+
 
         modelBatch.begin(cam);
         for (final Item3d instance : instances) {
@@ -229,6 +271,17 @@ public class MainGame extends InputAdapter implements ApplicationListener {
                 }
             }
         }
+
+        if(drawRay){
+            rayCopy.update(deltaTime);
+            modelBatch.render(rayCopy.meshModelInstanceLine, environment);
+
+            if(selone!=null){
+                rayTarget.meshModelInstance.transform.setTranslation(selone.getPos());
+            }
+            modelBatch.render(rayTarget.meshModelInstance, environment);
+        }
+
         modelBatch.end();
 
 
@@ -252,7 +305,7 @@ public class MainGame extends InputAdapter implements ApplicationListener {
         stage.draw();
     }
 
-    private String getTermString(Item3d selectItem) {
+    public static String getTermString(Item3d selectItem) {
         if(selectItem instanceof Concept){
             return ((Concept) selectItem).getTerm().toString();
         }else if(selectItem instanceof TermLink){
@@ -303,7 +356,7 @@ public class MainGame extends InputAdapter implements ApplicationListener {
             selectItem = null;
             selectItem = getObject(screenX, screenY);
             if(selectItem != null){
-                out.println("sel: \n"+getTermString(selectItem)+"\n");
+                log("sel: \n"+getTermString(selectItem)+"\n"+selectItem.uid+"\n");
                 setSelected(selectItem);
             }else{
                 setSelected(null);
@@ -335,22 +388,25 @@ public class MainGame extends InputAdapter implements ApplicationListener {
             }
         }
 
-
         // 设置当前选中的物体的高亮颜色或材质：
         selectItem = itemNow;
         if (selectItem != null) {
             selectItem.select();
+            camController.target.set(selectItem.getPos());
         }
     }
-
     public Item3d getObject(int screenX, int screenY) {
         Ray ray = cam.getPickRay(screenX, screenY);
+
+        rayCopyStart.set(ray.origin);
+        ray.getEndPoint(rayCopyEnd, 200);
+        rayCopy.setStartEndPosition(rayCopyStart, rayCopyEnd);
+
         Item3d result = null;
         float distance = -1;
         for (int i = 0; i < visibles.size(); ++i) {
-
-            //先比较大致距离，如果太大，则直接跳过
             final Item3d instance = visibles.get(i);
+            //如果是叠加的情况，在多个选中对象中，跳过距离远的
             instance.getCenter(position);
             float dist2 = ray.origin.dst2(position);
             if (distance >= 0f && dist2 > distance) continue;

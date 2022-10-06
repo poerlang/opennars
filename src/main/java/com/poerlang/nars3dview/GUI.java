@@ -19,6 +19,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.text.ParseException;
 
+import static com.poerlang.nars3dview.MainGame.butterflyMainGame;
 import static com.poerlang.nars3dview.MainGame.nar;
 
 public class GUI extends Application {
@@ -78,6 +79,7 @@ public class GUI extends Application {
     }
 
     public static void showGUI(){
+        MainGame.imGuiHover = false;
         ImGuiViewport imGuiViewport = imgui.internal.ImGui.getMainViewport();
         ImGui.setNextWindowPos(imGuiViewport.getPosX()+10,imGuiViewport.getPosY()+10);
         //第一个窗口，用来启动 NARS：
@@ -109,7 +111,7 @@ public class GUI extends Application {
                 }
                 ImGui.sameLine(); ImGui.textColored(0.6f,0.6f,0.6f,1,"NARS has stopped "+ FontAwesomeIcons.Snowflake);
             }
-            ImGui.sliderInt("Cycle n Step", Settings.narsSetting.step.getData(), 1,50);
+            ImGui.sliderInt("Cycle n Step", Settings.narsSetting.step.getData(), 1,300);
             ImGui.text("Test File: "); ImGui.sameLine(); ImGui.textColored(0.6f,0.6f,0.6f,1,testFile);
             ImGui.separator();
 
@@ -123,51 +125,60 @@ public class GUI extends Application {
             ImGui.textColored(1f,0.8f,0.3f,1,nar.memory.concepts.size()+"");
 
             ImGui.separator();
-            ImGui.checkbox("Auto Refresh 3D View After Cycle", Settings.renderSetting.AutoRender);
-            if(!Settings.renderSetting.AutoRender.get()){
-                if(ImGui.arrowButton("Refresh Concepts in 3D View",1)){
-                    nar.stop();
-                    View3dRefresh.refresh3DView(true);
-                }
-                ImGui.sameLine(); ImGui.text("Refresh Concepts in 3D View");
-            }else{
-                View3dRefresh.refreshCountDown++;
-                View3dRefresh.refresh3DView();
-            }
-            ImGui.sliderFloat("Refresh Percentage", Settings.renderSetting.refreshPercentage.getData(),0,1,"%.2f %");
-            ImGui.sliderInt("level threshold", Settings.renderSetting.levelThreshold.getData(),1,100);
-            ImGui.sliderFloat("priority threshold", Settings.renderSetting.priorityThreshold.getData(),0,1f);
-            ImGui.sliderInt("Max 3d object", Settings.renderSetting.maxConceptIn3dView.getData(),1,99999);
+            ImGui.sliderFloat("Refresh Percentage", Settings.renderSetting.refreshPercentage.getData(),0,1,"%.6f %");
+            ImGui.sliderInt("Level Threshold", Settings.renderSetting.levelThreshold.getData(),1,nar.narParameters.CONCEPT_BAG_LEVELS);
+            ImGui.sliderFloat("Priority Threshold", Settings.renderSetting.priorityThreshold.getData(),0,1f);
+            ImGui.sliderInt("Max 3d object", Settings.renderSetting.maxConceptIn3dView.getData(),1,1000);
+            ImGui.sliderFloat("Concept vs Link", Settings.renderSetting.ConceptVsLink.getData(),0,1,"%.6f %");
             ImGui.separator();
         }else{
             ImGui.text("Concept Number: 0");
         }
-        MainGame.imGuiHover = ImGui.isAnyItemHovered() || ImGui.isWindowHovered();
         ImVec2 windowAPos = ImGui.getWindowPos();
         ImVec2 windowASize = ImGui.getWindowSize();
+        if(ImGui.isAnyItemHovered() || ImGui.isWindowHovered()) MainGame.imGuiHover = true;
         ImGui.end();
 
-        //第二个窗口，用来设置线宽、颜色等：
-        ImGui.setNextWindowPos(windowAPos.x,windowAPos.y+windowASize.y+20, ImGuiCond.Always);
-        ImGui.begin("3D View Setting", ImGuiWindowFlags.AlwaysAutoResize);
-        ImGui.sliderFloat("Line3d Width", Settings.lineSetting.lineWidth.getData(), 0, 5);
-        ImGui.sliderFloat("Concept Base size", Settings.planeSetting.nodeSize.getData(), 0.01f, 5);
-        ImGui.text("Line3d Normal Color:");
-        ImGui.colorEdit4("Normal Start Point", Settings.lineSetting.normalStartColor.data);
-        ImGui.colorEdit4("Normal End Point", Settings.lineSetting.normalEndColor.data);
+        if(nar!=null) {
+            //第二个窗口，用来设置线宽、颜色等：
+            ImGui.setNextWindowPos(windowAPos.x, windowAPos.y + windowASize.y + 20, ImGuiCond.Always);
+            ImGui.begin("3D View Setting", ImGuiWindowFlags.AlwaysAutoResize);
+            ImGui.sliderFloat("Line3d Width", Settings.lineSetting.lineWidth.getData(), 0, 5);
+            ImGui.sliderFloat("Concept Base size", Settings.planeSetting.nodeSize.getData(), 0.01f, 5);
+            ImGui.text("Line3d Normal Color:");
+            ImGui.colorEdit4("Normal Start Point", Settings.lineSetting.normalStartColor.data);
+            ImGui.colorEdit4("Normal End Point", Settings.lineSetting.normalEndColor.data);
 
-        ImGui.separator();
+            ImGui.separator();
 
-        ImGui.text("Line3d Selected Color:");
-        ImGui.colorEdit4("Selected Start Point", Settings.lineSetting.selectStartColor.data);
-        ImGui.colorEdit4("Selected End Point", Settings.lineSetting.selectEndColor.data);
-        MainGame.imGuiHover = ImGui.isAnyItemHovered() || ImGui.isWindowHovered();
-        ImGui.end();
+            ImGui.text("Line3d Selected Color:");
+            ImGui.colorEdit4("Selected Start Point", Settings.lineSetting.selectStartColor.data);
+            ImGui.colorEdit4("Selected End Point", Settings.lineSetting.selectEndColor.data);
+            if(ImGui.isAnyItemHovered() || ImGui.isWindowHovered()) MainGame.imGuiHover = true;
+            ImGui.end();
+        }
 
         //第三个窗口，输入 nars 语
         InputTextEdit.show();
-    }
 
+
+        //第四给窗口，测试具身相关的操作
+        imgui.internal.ImGui.setNextWindowSize(winW, winH, ImGuiCond.Once);
+        imgui.internal.ImGui.setNextWindowPos(imGuiViewport.getPosX() + imGuiViewport.getSizeX() - winW - 10, imGuiViewport.getPosY()+imGuiViewport.getSizeY() -(winH+10) , ImGuiCond.Always);
+        ImGui.begin("Operator Test",ImGuiWindowFlags.AlwaysAutoResize);
+        ImVec2 windowSize = ImGui.getWindowSize();
+        winW = windowSize.x;
+        winH = windowSize.y;
+        ImGui.dragFloat2("Force dir",Settings.butterflySetting.forceDir);
+        ImGui.sliderFloat("Force num",Settings.butterflySetting.forceNum.getData(),0.001f,30f);
+        if(ImGui.button("Add Force (Impulse)")){
+            butterflyMainGame.butterfly.move();
+        }
+        if(ImGui.isAnyItemHovered() || ImGui.isWindowHovered()) MainGame.imGuiHover = true;
+        ImGui.end();
+    }
+    static float winW = 300;
+    static float winH = 190;
     @Override
     public void process() {
         ImGui.text("Hello, World! " + FontAwesomeIcons.Smile);

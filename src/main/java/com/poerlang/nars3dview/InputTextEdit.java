@@ -149,8 +149,8 @@ public class InputTextEdit {
         ImGui.text("Send Text To NARS Channel");
         ImGui.separator();
 
-        MainGame.imGuiHover = ImGui.isAnyItemHovered() || ImGui.isWindowHovered();
         EDITOR.render("TextEditor");
+        if(ImGui.isAnyItemHovered() || ImGui.isWindowHovered()) MainGame.imGuiHover = true;
         ImGui.end();
     }
 
@@ -158,11 +158,14 @@ public class InputTextEdit {
         String textToSave = EDITOR.getText();
         String[] lines = textToSave.split("\n");
         for (String line : lines) {
+            if(line.indexOf('/')==0){
+                MainGame.setSel(line.substring(1));
+                return;
+            }
             if (line != null && !line.equals("")) {
                 try {
                     nar.addInput(line);
                     nar.cycles(Settings.narsSetting.cycleAfterInput.get());
-                    if (!Settings.renderSetting.AutoRender.get()) View3dRefresh.refresh3DView(true);
                 } catch (Exception ex) {
                     if (Debug.DETAILED) {
                         throw new IllegalStateException("error parsing:" + line, ex);

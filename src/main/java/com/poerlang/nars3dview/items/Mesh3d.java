@@ -16,7 +16,7 @@ public class Mesh3d implements Pool.Poolable {
     static {
         ModelBuilder modelBuilder = new ModelBuilder();
         Model model = modelBuilder.createBox(1f, 1f, 1f,
-                new Material(ColorAttribute.createDiffuse(Color.WHITE)),
+                new Material(ColorAttribute.createDiffuse(Color.RED)),
                 VertexAttributes.Usage.Position | VertexAttributes.Usage.Normal);
         meshStaticModel = new ModelInstance(model);
     }

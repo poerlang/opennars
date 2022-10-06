@@ -161,7 +161,7 @@ public class Item3d {
         line3d.setStartEndPosition(p1,p2);
     }
     public Vector3 getPos() {
-        return myPosition;
+        return getPos(myPosition);
     }
     public Vector3 getPos(Vector3 pos) {
         return pos.set(myPosition);
@@ -237,7 +237,7 @@ public class Item3d {
         vector3.add(offset);
         myPosition.set(vector3);
         if(isPlane()){
-            plane3d.decal.setPosition(vector3);
+            plane3d.decal.setPosition(myPosition);
         }else if(isMesh()){
             mesh3d.meshModelInstance.transform.setTranslation(myPosition);
         }

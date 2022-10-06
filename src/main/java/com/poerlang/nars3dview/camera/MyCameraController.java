@@ -64,9 +64,13 @@ public class MyCameraController extends CameraInputController {
         }
         if (autoUpdate) camera.update(true);
     }
+    public boolean zoom (float amount) {
+        return super.zoom(amount*3);
+    }
 
     @Override
     protected boolean process (float deltaX, float deltaY, int button) {
-        return super.process(deltaX*2.8f, deltaY, button);
+        boolean r = button == rotateButton;
+        return super.process(deltaX*(r?1:9f), deltaY*(r?1:6), button);
     }
 }

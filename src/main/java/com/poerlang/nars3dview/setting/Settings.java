@@ -5,4 +5,6 @@ public class Settings {
     public static NarsSetting narsSetting = new NarsSetting();
     public static RenderSetting renderSetting = new RenderSetting();
     public static PlaneSetting planeSetting = new PlaneSetting();
+
+    public static ButterflySetting butterflySetting = new ButterflySetting();
 }

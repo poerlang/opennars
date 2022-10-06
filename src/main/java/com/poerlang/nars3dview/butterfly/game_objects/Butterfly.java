@@ -33,7 +33,7 @@ public class Butterfly extends GameObject {
         this.angle += a+aSpeed;
         transform.setFromEulerAngles(this.angle,90,0);
     }
-    Vector3 force = new Vector3();
+    Vector3 force = new Vector3(0,1,0);
     public void move(){
         force.set(Settings.butterflySetting.forceDir[0],0,Settings.butterflySetting.forceDir[1])
                 .nor()
@@ -45,4 +45,13 @@ public class Butterfly extends GameObject {
 //        move(0,delta);
     }
 
+    public void left() {
+        force.set(0,Settings.butterflySetting.forceNum.get(),0);
+        this.body.applyTorqueImpulse(force);
+    }
+
+    public void right() {
+        force.set(0,-Settings.butterflySetting.forceNum.get(),0);
+        this.body.applyTorqueImpulse(force);
+    }
 }

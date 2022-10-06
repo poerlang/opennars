@@ -176,6 +176,15 @@ public class GUI extends Application {
         if(ImGui.button("Add Force (Impulse)")){
             butterflyMainGame.butterfly.move();
         }
+
+        if(ImGui.button("Turn Left (Rotate)")){
+            butterflyMainGame.butterfly.left();
+        }
+        ImGui.sameLine();
+        if(ImGui.button("Turn Right (Rotate)")){
+            butterflyMainGame.butterfly.right();
+        }
+
         if(ImGui.isAnyItemHovered() || ImGui.isWindowHovered()) MainGame.imGuiHover = true;
         ImGui.end();
     }

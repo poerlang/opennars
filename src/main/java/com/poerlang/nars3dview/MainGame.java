@@ -376,6 +376,7 @@ public class MainGame extends InputAdapter implements ApplicationListener {
         selectItem = itemNow;
         if (selectItem != null) {
             selectItem.select();
+            camController.target.set(selectItem.getPos());
         }
     }
     public Item3d getObject(int screenX, int screenY) {

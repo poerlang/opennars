@@ -171,10 +171,10 @@ public class GUI extends Application {
         ImVec2 windowSize = ImGui.getWindowSize();
         winW = windowSize.x;
         winH = windowSize.y;
-        ImGui.dragFloat2("Force dir",Settings.butterflySetting.forceDir);
-        ImGui.sliderFloat("Force num",Settings.butterflySetting.forceNum.getData(),0.001f,30f);
+        ImGui.sliderFloat("Force Forward",Settings.butterflySetting.force.getData(),0.001f,30f);
+        ImGui.sliderFloat("Force Rot(Left/Right)",Settings.butterflySetting.RotForce.getData(),0.001f,12f);
         if(ImGui.button("Add Force (Impulse)")){
-            butterflyMainGame.butterfly.move();
+            butterflyMainGame.butterfly.forward();
         }
 
         if(ImGui.button("Turn Left (Rotate)")){

@@ -1,10 +1,8 @@
 package com.poerlang.nars3dview.butterfly.game_objects;
 
-import com.badlogic.gdx.math.MathUtils;
+import com.badlogic.gdx.math.Quaternion;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.physics.bullet.collision.btCollisionObject;
-import com.badlogic.gdx.physics.bullet.dynamics.btRigidBody;
-import com.poerlang.nars3dview.butterfly.game_objects.models.Models;
 import com.poerlang.nars3dview.setting.Settings;
 
 public class Butterfly extends GameObject {
@@ -33,25 +31,34 @@ public class Butterfly extends GameObject {
         this.angle += a+aSpeed;
         transform.setFromEulerAngles(this.angle,90,0);
     }
-    Vector3 force = new Vector3(0,1,0);
-    public void move(){
-        force.set(Settings.butterflySetting.forceDir[0],0,Settings.butterflySetting.forceDir[1])
-                .nor()
-                .scl(Settings.butterflySetting.forceNum.get());
-        this.body.applyCentralImpulse(force);
-    }
+
     public void update(float delta) {
 //        angle(delta);
 //        move(0,delta);
     }
-
+    public Vector3 angle2vector(float a) {
+        float s1 = (float) Math.cos(a);
+        float s2 = (float) Math.sin(a);
+        return force.set(s1,0f, -s2);
+    }
+    Vector3 force = new Vector3(0,1,0);
+    Quaternion q = new Quaternion();
+    public void forward(){
+        this.transform.getRotation(q);
+        q.getAxisAngle(force);
+        float angleAround = q.getAngleAround(Vector3.Y);
+        angleAround-=90;
+        angle2vector((float) (angleAround*Math.PI/180));
+        force.scl(Settings.butterflySetting.force.get());
+        this.body.applyCentralImpulse(force);
+    }
     public void left() {
-        force.set(0,Settings.butterflySetting.forceNum.get(),0);
+        force.set(0,Settings.butterflySetting.RotForce.get(),0);
         this.body.applyTorqueImpulse(force);
     }
 
     public void right() {
-        force.set(0,-Settings.butterflySetting.forceNum.get(),0);
+        force.set(0,-Settings.butterflySetting.RotForce.get(),0);
         this.body.applyTorqueImpulse(force);
     }
 }

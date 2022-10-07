@@ -12,6 +12,9 @@ import com.badlogic.gdx.graphics.g3d.decals.Decal;
 import com.badlogic.gdx.graphics.g3d.decals.DecalBatch;
 import com.badlogic.gdx.graphics.g3d.environment.DirectionalShadowLight;
 import com.badlogic.gdx.graphics.g3d.utils.DepthShaderProvider;
+import com.badlogic.gdx.graphics.glutils.FrameBuffer;
+import com.badlogic.gdx.graphics.glutils.HdpiMode;
+import com.badlogic.gdx.graphics.glutils.HdpiUtils;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.Intersector;
 import com.badlogic.gdx.math.Vector3;
@@ -67,6 +70,7 @@ public class MainGame extends InputAdapter implements ApplicationListener {
     public PerspectiveCamera cam2;
     public static Array<Item3d> instances = new Array<Item3d>();
     SpriteBatch batch;
+    SpriteBatch batchCam2;
     Texture img;
     ExtendViewport extendViewport;
     ScreenViewport screenViewport;
@@ -121,8 +125,12 @@ public class MainGame extends InputAdapter implements ApplicationListener {
 
     static int cam2W = 503;
     static int cam2H = 200;
+    static float oldW=100;
+    static float oldH=100;
     @Override
     public void create() {
+        oldW = Gdx.graphics.getWidth();
+        oldH = Gdx.graphics.getHeight();
         createLabel();
         environment = new Environment();
         environment.set(new ColorAttribute(ColorAttribute.AmbientLight, 0.4f, 0.4f, 0.4f, 1f));
@@ -131,7 +139,7 @@ public class MainGame extends InputAdapter implements ApplicationListener {
         shadowBatch = new ModelBatch(new DepthShaderProvider());
 
         modelBatch = new ModelBatch();
-        batch = new SpriteBatch();
+        batchCam2 = new SpriteBatch();
         img = new Texture("task.png");
         cam = new PerspectiveCamera(67, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
         cam2 = new PerspectiveCamera(67, cam2W, cam2H);
@@ -198,7 +206,10 @@ public class MainGame extends InputAdapter implements ApplicationListener {
 
         final long backupWindowPtr = GLFW.glfwGetCurrentContext();
         out.println(backupWindowPtr);
+
+        fbo = new FrameBuffer(Pixmap.Format.RGBA8888, cam2W, cam2H, true);
     }
+    static FrameBuffer fbo;
     private void renderGUI() {
 
         imGuiGlfw.newFrame();
@@ -242,6 +253,7 @@ public class MainGame extends InputAdapter implements ApplicationListener {
     }
     public static LinkedList<Item3d> plane3ds = new LinkedList<>();
     public static LinkedList<Item3d> visibles = new LinkedList<>();
+
     @Override
     public void render() {
         camController.update();
@@ -307,10 +319,9 @@ public class MainGame extends InputAdapter implements ApplicationListener {
         screenViewport.setScreenY((int) (operatorWinH + 20));
         screenViewport.apply();
 
-        // 绘制第二个摄像机的蓝色背景，防止透视到后面的场景，todo: 需修正 3d 地面靠近时遮挡 cam2 的问题
-        batch.begin();
-        tiledDrawable.draw(batch, 0, 0, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
-        batch.end();
+        fbo.begin();
+        Gdx.gl.glClearColor(0.1f, 0.1f, 0.3f, 1);
+        Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT | GL20.GL_DEPTH_BUFFER_BIT);
 
         // 将第二个摄像机挂到 butterfly 上，并拍摄其看到的画面
         cam2.position.set(butterflyMainGame.butterfly.transform.getTranslation(cam2Pos));
@@ -318,22 +329,38 @@ public class MainGame extends InputAdapter implements ApplicationListener {
         cam2.up.set(Vector3.Y);
         cam2.lookAt(cam2LookAtPos);
         butterflyMainGame.renderCam2(cam2,environment);
+        fbo.end();
 
         // 绘制摄像机外框，便于在前后两个摄像机背景色相同时区分画面
         ShapeRenderer sr = new ShapeRenderer();
         sr.setColor(Color.GRAY);
         sr.begin(ShapeRenderer.ShapeType.Filled);
-        int lineW = 3;
-        sr.rectLine(lineW, lineW, lineW, Gdx.graphics.getHeight(), lineW);
-        sr.rectLine(lineW, Gdx.graphics.getHeight()-lineW, Gdx.graphics.getWidth(), Gdx.graphics.getHeight()-lineW, lineW);
-        sr.rectLine(0, lineW, Gdx.graphics.getWidth(), lineW, lineW);
-        sr.rectLine(Gdx.graphics.getWidth(), Gdx.graphics.getHeight()-lineW, Gdx.graphics.getWidth(), lineW, lineW);
+        int lineW = 2;
+        int x1 = extendViewport.getScreenWidth()-cam2W-10;
+        int y1 = (int) (operatorWinH + 20);
+        int x2 = x1+cam2W;
+        int y2 = y1+cam2H;
+        sr.rectLine(x1, y2, x1, y1, lineW);
+        sr.rectLine(x1, y1, x2, y1, lineW);
+        sr.rectLine(x2, y1, x2, y2, lineW);
+        sr.rectLine(x1, y2, x2, y2, lineW);
         sr.end();
+
 
         renderGUI();
 
         renderLabel();
+
+        stage.getViewport().apply();
+
+        batchCam2.begin();
+        Texture colorBufferTexture = fbo.getColorBufferTexture();
+        textureRegion.setRegion(colorBufferTexture);
+        textureRegion.flip(false, true);
+        batchCam2.draw(textureRegion,(newW-cam2W-10),(int) (operatorWinH + 20),cam2W,cam2H);
+        batchCam2.end();
     }
+    TextureRegion textureRegion = new TextureRegion();
     private void renderLabel() {
         stringBuilder.setLength(0);
         stringBuilder.append("  FPS: ").append(Gdx.graphics.getFramesPerSecond());
@@ -472,16 +499,19 @@ public class MainGame extends InputAdapter implements ApplicationListener {
 
     @Override
     public void dispose() {
-        batch.dispose();
+        batchCam2.dispose();
         butterflyMainGame.dispose();
         img.dispose();
         imGuiGl3.dispose();
         imGuiGlfw.dispose();
         ImGui.destroyContext();
     }
-
+    static float newW = 100;
+    static float newH = 100;
     @Override
     public void resize(int width, int height) {
+        newW = width;
+        newH = height;
         extendViewport.update(width,height);
     }
 }

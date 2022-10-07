@@ -80,9 +80,6 @@ public class ButterflyMainGame {
     ModelBatch batch = new ModelBatch();
     public void renderCam2(PerspectiveCamera cam2, Environment environment) {
         batch.begin(cam2);
-//        modelBatch.getRenderContext().setDepthTest(GL20.GL_GREATER);
-//        modelBatch.getRenderContext().setDepthMask(false);
-        batch.getRenderContext().setBlending(true ,GL20.GL_ONE,GL20.GL_NONE);
         for (ModelInstance instance : instances) {
             batch.render(instance, environment);
         }

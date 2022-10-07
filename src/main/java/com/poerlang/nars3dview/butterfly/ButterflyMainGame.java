@@ -1,6 +1,8 @@
 package com.poerlang.nars3dview.butterfly;
 
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.graphics.GL20;
+import com.badlogic.gdx.graphics.PerspectiveCamera;
 import com.badlogic.gdx.graphics.g3d.*;
 import com.badlogic.gdx.physics.bullet.Bullet;
 import com.badlogic.gdx.utils.Array;
@@ -75,7 +77,17 @@ public class ButterflyMainGame {
             modelBatch.render(instance, environment);
         }
     }
-
+    ModelBatch batch = new ModelBatch();
+    public void renderCam2(PerspectiveCamera cam2, Environment environment) {
+        batch.begin(cam2);
+//        modelBatch.getRenderContext().setDepthTest(GL20.GL_GREATER);
+//        modelBatch.getRenderContext().setDepthMask(false);
+        batch.getRenderContext().setBlending(true ,GL20.GL_ONE,GL20.GL_NONE);
+        for (ModelInstance instance : instances) {
+            batch.render(instance, environment);
+        }
+        batch.end();
+    }
     public void dispose() {
         for (GameObject obj : instances)
             obj.dispose();

@@ -164,13 +164,13 @@ public class GUI extends Application {
         InputTextEdit.show();
 
 
-        //第四给窗口，测试具身相关的操作
-        imgui.internal.ImGui.setNextWindowSize(winW, winH, ImGuiCond.Once);
-        imgui.internal.ImGui.setNextWindowPos(imGuiViewport.getPosX() + imGuiViewport.getSizeX() - winW - 10, imGuiViewport.getPosY()+imGuiViewport.getSizeY() -(winH+10) , ImGuiCond.Always);
+        //第四个窗口，测试具身相关的操作
+        imgui.internal.ImGui.setNextWindowSize(operatorWinW, operatorWinH, ImGuiCond.Once);
+        imgui.internal.ImGui.setNextWindowPos(imGuiViewport.getPosX() + imGuiViewport.getSizeX() - operatorWinW - 10, imGuiViewport.getPosY()+imGuiViewport.getSizeY() -(operatorWinH +10) , ImGuiCond.Always);
         ImGui.begin("Operator Test",ImGuiWindowFlags.AlwaysAutoResize);
         ImVec2 windowSize = ImGui.getWindowSize();
-        winW = windowSize.x;
-        winH = windowSize.y;
+        operatorWinW = windowSize.x;
+        operatorWinH = windowSize.y;
         ImGui.sliderFloat("Force Forward",Settings.butterflySetting.force.getData(),0.001f,30f);
         ImGui.sliderFloat("Force Rot(Left/Right)",Settings.butterflySetting.RotForce.getData(),0.001f,12f);
         if(ImGui.button("Add Force (Impulse)")){
@@ -188,8 +188,8 @@ public class GUI extends Application {
         if(ImGui.isAnyItemHovered() || ImGui.isWindowHovered()) MainGame.imGuiHover = true;
         ImGui.end();
     }
-    static float winW = 300;
-    static float winH = 190;
+    static float operatorWinW = 300;
+    public static float operatorWinH = 190;
     @Override
     public void process() {
         ImGui.text("Hello, World! " + FontAwesomeIcons.Smile);

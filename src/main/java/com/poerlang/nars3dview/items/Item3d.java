@@ -40,7 +40,8 @@ public class Item3d {
         originalMaterial = new Material();
         textures = new TextureRegion[]{
             new TextureRegion(new Texture(Gdx.files.internal("task.png"))),
-            new TextureRegion(new Texture(Gdx.files.internal("node.png")))
+            new TextureRegion(new Texture(Gdx.files.internal("node.png"))),
+            new TextureRegion(new Texture(Gdx.files.internal("black.png"))),
         };
         Pools.get(Plane3d.class).fill(200);
         Pools.get(Mesh3d.class).fill(200);

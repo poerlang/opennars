@@ -33,25 +33,28 @@ public class Butterfly extends GameObject {
     }
 
     public void update(float delta) {
-//        angle(delta);
-//        move(0,delta);
+        calcMyForwardDir();
     }
     public Vector3 angle2vector(float a) {
         float s1 = (float) Math.cos(a);
         float s2 = (float) Math.sin(a);
         return force.set(s1,0f, -s2);
     }
-    Vector3 force = new Vector3(0,1,0);
+    public Vector3 force = new Vector3(0,1,0);
     Quaternion q = new Quaternion();
     public void forward(){
+        force.scl(Settings.butterflySetting.force.get());
+        this.body.applyCentralImpulse(force);
+    }
+
+    private void calcMyForwardDir() {
         this.transform.getRotation(q);
         q.getAxisAngle(force);
         float angleAround = q.getAngleAround(Vector3.Y);
         angleAround-=90;
         angle2vector((float) (angleAround*Math.PI/180));
-        force.scl(Settings.butterflySetting.force.get());
-        this.body.applyCentralImpulse(force);
     }
+
     public void left() {
         force.set(0,Settings.butterflySetting.RotForce.get(),0);
         this.body.applyTorqueImpulse(force);

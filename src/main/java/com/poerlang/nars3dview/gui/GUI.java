@@ -21,8 +21,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.text.ParseException;
 
-import static com.poerlang.nars3dview.MainGame.butterflyMainGame;
-import static com.poerlang.nars3dview.MainGame.nar;
+import static com.poerlang.nars3dview.MainGame.*;
 
 public class GUI extends Application {
     private final ImString str = new ImString(5);
@@ -175,6 +174,10 @@ public class GUI extends Application {
         ImGui.sliderFloat("Force Rot(Left/Right)",Settings.butterflySetting.RotForce.getData(),0.001f,12f);
         if(ImGui.button("Add Force (Impulse)")){
             butterflyMainGame.butterfly.forward();
+        }
+        ImGui.sameLine();
+        if(ImGui.button("print screen pixel (1288,555)'s color")){
+            log(MainGame.getLight(1288,555));
         }
 
         if(ImGui.button("Turn Left (Rotate)")){

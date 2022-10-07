@@ -13,8 +13,6 @@ import com.badlogic.gdx.graphics.g3d.decals.DecalBatch;
 import com.badlogic.gdx.graphics.g3d.environment.DirectionalShadowLight;
 import com.badlogic.gdx.graphics.g3d.utils.DepthShaderProvider;
 import com.badlogic.gdx.graphics.glutils.FrameBuffer;
-import com.badlogic.gdx.graphics.glutils.HdpiMode;
-import com.badlogic.gdx.graphics.glutils.HdpiUtils;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.Intersector;
 import com.badlogic.gdx.math.Vector3;
@@ -46,6 +44,7 @@ import org.lwjgl.glfw.GLFWErrorCallback;
 import org.lwjgl.opengl.GL;
 
 import java.io.PrintWriter;
+import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
@@ -123,8 +122,8 @@ public class MainGame extends InputAdapter implements ApplicationListener {
 
     }
 
-    static int cam2W = 503;
-    static int cam2H = 200;
+    public static int cam2W = 503;
+    public static int cam2H = 200;
     static float oldW=100;
     static float oldH=100;
     @Override
@@ -354,11 +353,23 @@ public class MainGame extends InputAdapter implements ApplicationListener {
         extendViewport.apply();
 
         batchCam2.begin();
-        Texture colorBufferTexture = fbo.getColorBufferTexture();
+        colorBufferTexture = fbo.getColorBufferTexture();
         textureRegion.setRegion(colorBufferTexture);
         textureRegion.flip(false, true);
         batchCam2.draw(textureRegion,x1*(oldW/newW),y1*(oldH/newH),cam2W*(oldW/newW),cam2H*(oldH/newH));
         batchCam2.end();
+    }
+    static Texture colorBufferTexture;
+    static Color color = new Color();
+    public static Color getLight(int x, int y){
+        final Pixmap pixmap = new Pixmap(1, 1, Pixmap.Format.RGBA8888);
+        ByteBuffer pixels = pixmap.getPixels();
+
+        Gdx.gl20.glReadPixels(x, y, 1, 1, GL20.GL_RGBA, GL20.GL_UNSIGNED_BYTE,
+                pixels);
+//        color.set(colorBufferTexture.getTextureData().consumePixmap().getPixel(x,y));
+        color.set( pixmap.getPixel(1,1));
+        return color;
     }
     TextureRegion textureRegion = new TextureRegion();
     private void renderLabel() {

@@ -351,13 +351,13 @@ public class MainGame extends InputAdapter implements ApplicationListener {
 
         renderLabel();
 
-        stage.getViewport().apply();
+        extendViewport.apply();
 
         batchCam2.begin();
         Texture colorBufferTexture = fbo.getColorBufferTexture();
         textureRegion.setRegion(colorBufferTexture);
         textureRegion.flip(false, true);
-        batchCam2.draw(textureRegion,(newW-cam2W-10),(int) (operatorWinH + 20),cam2W,cam2H);
+        batchCam2.draw(textureRegion,x1*(oldW/newW),y1*(oldH/newH),cam2W*(oldW/newW),cam2H*(oldH/newH));
         batchCam2.end();
     }
     TextureRegion textureRegion = new TextureRegion();
@@ -513,5 +513,7 @@ public class MainGame extends InputAdapter implements ApplicationListener {
         newW = width;
         newH = height;
         extendViewport.update(width,height);
+//        screenViewport.update(width,height);
+//        stage.getViewport().update(width,height);
     }
 }

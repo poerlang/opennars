@@ -10,6 +10,7 @@ A OpenNARS Test App in 3D
 
 ![](assets/snapshot.png)
 ![](assets/snapshot2.png)
+![](assets/snapshot3.png)
 `OpenNARS + ImGUI + LibGdx + ...`
 
 ## Setup And Run

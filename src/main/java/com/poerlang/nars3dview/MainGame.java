@@ -1,6 +1,7 @@
 package com.poerlang.nars3dview;
 //提醒：启动时在 build and run 参数中添加： -Dfile.encoding=UTF-8
 import com.badlogic.gdx.*;
+import com.badlogic.gdx.files.FileHandle;
 import com.badlogic.gdx.graphics.*;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
@@ -79,6 +80,8 @@ public class MainGame extends InputAdapter implements ApplicationListener {
     public static boolean imGuiHover;
     int downScreenX;
     int downScreenY;
+    int moveScreenX;
+    int moveScreenY;
     private String glslVersion = null;
     private ModelBatch modelBatch;
     private Environment environment;
@@ -138,11 +141,12 @@ public class MainGame extends InputAdapter implements ApplicationListener {
         shadowBatch = new ModelBatch(new DepthShaderProvider());
 
         modelBatch = new ModelBatch();
+        batch = new SpriteBatch();
         batchCam2 = new SpriteBatch();
         img = new Texture("task.png");
         cam = new PerspectiveCamera(67, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
         cam2 = new PerspectiveCamera(67, cam2W, cam2H);
-        cam.position.set(11f, 11f, 11f);
+        cam.position.set(22f, 22f, 22f);
         cam2.position.set(11f, 11f, 11f);
         cam.lookAt(0, 0, 0);
         cam2.lookAt(0, 0, 0);
@@ -173,6 +177,9 @@ public class MainGame extends InputAdapter implements ApplicationListener {
 
         rayCopy = new Line3d();
         rayTarget = new Mesh3d();
+
+        pixmapJustOnePixel = new Pixmap(1, 1, Pixmap.Format.RGBA8888);
+        pixelsJustOnePixel = pixmapJustOnePixel.getPixels();
     }
     static Mesh3d rayTarget;
     static Line3d rayCopy;
@@ -252,6 +259,11 @@ public class MainGame extends InputAdapter implements ApplicationListener {
     }
     public static LinkedList<Item3d> plane3ds = new LinkedList<>();
     public static LinkedList<Item3d> visibles = new LinkedList<>();
+    static final int cam2OutlineWidth = 2;
+    static int eye_x1;
+    static int eye_y1;
+    static int eye_x2;
+    static int eye_y2;
 
     @Override
     public void render() {
@@ -318,9 +330,10 @@ public class MainGame extends InputAdapter implements ApplicationListener {
         screenViewport.setScreenY((int) (operatorWinH + 20));
         screenViewport.apply();
 
-        fbo.begin();
-        Gdx.gl.glClearColor(0.1f, 0.1f, 0.3f, 1);
-        Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT | GL20.GL_DEPTH_BUFFER_BIT);
+        // 绘制第二个摄像机的蓝色背景，防止透视到后面的场景，todo: 需修正 3d 地面靠近时遮挡 cam2 的问题
+        batch.begin();
+        tiledDrawable.draw(batch, 0, 0, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
+        batch.end();
 
         // 将第二个摄像机挂到 butterfly 上，并拍摄其看到的画面
         cam2.position.set(butterflyMainGame.butterfly.transform.getTranslation(cam2Pos));
@@ -328,23 +341,11 @@ public class MainGame extends InputAdapter implements ApplicationListener {
         cam2.up.set(Vector3.Y);
         cam2.lookAt(cam2LookAtPos);
         butterflyMainGame.renderCam2(cam2,environment);
-        fbo.end();
 
-        // 绘制摄像机外框，便于在前后两个摄像机背景色相同时区分画面
-        ShapeRenderer sr = new ShapeRenderer();
-        sr.setColor(Color.GRAY);
-        sr.begin(ShapeRenderer.ShapeType.Filled);
-        int lineW = 2;
-        int x1 = extendViewport.getScreenWidth()-cam2W-10;
-        int y1 = (int) (operatorWinH + 20);
-        int x2 = x1+cam2W;
-        int y2 = y1+cam2H;
-        sr.rectLine(x1, y2, x1, y1, lineW);
-        sr.rectLine(x1, y1, x2, y1, lineW);
-        sr.rectLine(x2, y1, x2, y2, lineW);
-        sr.rectLine(x1, y2, x2, y2, lineW);
-        sr.end();
-
+        eye_x1 = extendViewport.getScreenWidth()-cam2W-10;
+        eye_y1 = (int) (operatorWinH + 20);
+        eye_x2 = eye_x1 +cam2W;
+        eye_y2 = eye_y1 +cam2H;
 
         renderGUI();
 
@@ -352,26 +353,76 @@ public class MainGame extends InputAdapter implements ApplicationListener {
 
         extendViewport.apply();
 
-        batchCam2.begin();
-        colorBufferTexture = fbo.getColorBufferTexture();
-        textureRegion.setRegion(colorBufferTexture);
-        textureRegion.flip(false, true);
-        batchCam2.draw(textureRegion,x1*(oldW/newW),y1*(oldH/newH),cam2W*(oldW/newW),cam2H*(oldH/newH));
-        batchCam2.end();
-    }
-    static Texture colorBufferTexture;
-    static Color color = new Color();
-    public static Color getLight(int x, int y){
-        final Pixmap pixmap = new Pixmap(1, 1, Pixmap.Format.RGBA8888);
-        ByteBuffer pixels = pixmap.getPixels();
+        getColorOnScreen(moveScreenX, moveScreenY);
 
-        Gdx.gl20.glReadPixels(x, y, 1, 1, GL20.GL_RGBA, GL20.GL_UNSIGNED_BYTE,
-                pixels);
-//        color.set(colorBufferTexture.getTextureData().consumePixmap().getPixel(x,y));
-        color.set( pixmap.getPixel(1,1));
-        return color;
+        // 绘制摄像机外框，便于在前后两个摄像机背景色相同时区分画面
+        ShapeRenderer sr = new ShapeRenderer();
+        sr.setColor(Color.GRAY);
+        sr.begin(ShapeRenderer.ShapeType.Filled);
+        sr.rectLine(eye_x1, eye_y2, eye_x1, eye_y1, cam2OutlineWidth);
+        sr.rectLine(eye_x1, eye_y1, eye_x2, eye_y1, cam2OutlineWidth);
+        sr.rectLine(eye_x2, eye_y1, eye_x2, eye_y2, cam2OutlineWidth);
+        sr.rectLine(eye_x1, eye_y2, eye_x2, eye_y2, cam2OutlineWidth);
+        sr.end();
     }
-    TextureRegion textureRegion = new TextureRegion();
+
+    static Color colorInCam2 = new Color();
+    public static imgui.app.Color colorInCam2ForImGui = new imgui.app.Color();
+
+    static Pixmap pixmapJustOnePixel;
+    static ByteBuffer pixelsJustOnePixel;
+
+    public static Color getColorOnScreen(int x, int y){
+        Gdx.gl.glPixelStorei(GL20.GL_PACK_ALIGNMENT, 1);
+        Gdx.gl20.glReadPixels(x, Gdx.graphics.getHeight()-y, // 由于 OpenGL 的原因，这里需要纵向反转，所以 y 实际是 height-y
+                1, 1,
+                GL20.GL_RGBA, GL20.GL_UNSIGNED_BYTE,
+                pixelsJustOnePixel);
+        colorInCam2.set( pixmapJustOnePixel.getPixel(0,0));
+        colorInCam2ForImGui.set(colorInCam2.r,colorInCam2.g,colorInCam2.b,colorInCam2.a);
+        return colorInCam2;
+    }
+    public static Color getColorOnEye(int x, int y){
+        Gdx.gl.glPixelStorei(GL20.GL_PACK_ALIGNMENT, 1);
+        Gdx.gl20.glReadPixels( eye_x1 +x, Gdx.graphics.getHeight()-(eye_y1+y), // 由于 OpenGL 的原因，这里需要纵向反转，所以 y 实际是 height-y
+                1, 1,
+                GL20.GL_RGBA, GL20.GL_UNSIGNED_BYTE,
+                pixelsJustOnePixel);
+        colorInCam2.set( pixmapJustOnePixel.getPixel(0,0));
+        colorInCam2ForImGui.set(colorInCam2.r,colorInCam2.g,colorInCam2.b,colorInCam2.a);
+        return colorInCam2;
+    }
+    public static void saveScreenshot(){
+        int width = Gdx.graphics.getWidth();
+        int height = Gdx.graphics.getHeight();
+        Pixmap pixmapForScreenshot = new Pixmap(width, height, Pixmap.Format.RGBA8888);
+        ByteBuffer pixelsScreenshot = pixmapForScreenshot.getPixels();
+        FileHandle fh;
+        int count = 0;
+        do{
+            count++;
+            fh = new FileHandle("screenshot"+ count +".png");
+        }while (fh.exists());
+
+        Gdx.gl.glPixelStorei(GL20.GL_PACK_ALIGNMENT, 1);
+        Gdx.gl.glReadPixels(0,0, width, height, GL20.GL_RGBA, GL20.GL_UNSIGNED_BYTE, pixelsScreenshot);
+
+        // 截图出来的画面是上下颠倒的，所以需要做翻转
+        int numBytes = width * height * 4;
+        byte[] lines = new byte[numBytes];
+        int numBytesPerLine = width * 4;
+        for (int i = 0; i < height; i++) {
+            pixelsScreenshot.position((height - i - 1) * numBytesPerLine);
+            pixelsScreenshot.get(lines, i * numBytesPerLine, numBytesPerLine);
+        }
+        pixelsScreenshot.clear();
+        pixelsScreenshot.put(lines);
+        pixelsScreenshot.clear();
+
+        PixmapIO.writePNG(fh, pixmapForScreenshot);
+
+        pixmapForScreenshot.dispose();
+    }
     private void renderLabel() {
         stringBuilder.setLength(0);
         stringBuilder.append("  FPS: ").append(Gdx.graphics.getFramesPerSecond());
@@ -409,6 +460,12 @@ public class MainGame extends InputAdapter implements ApplicationListener {
         downScreenX = screenX;
         downScreenY = screenY;
         //返回 false 代表其它同类事件函数可以继续执行，true 代表跳过其它同类事件
+        return false;
+    }
+
+    public boolean mouseMoved (int screenX, int screenY) {
+        moveScreenX = screenX;
+        moveScreenY = screenY;
         return false;
     }
 
@@ -524,7 +581,5 @@ public class MainGame extends InputAdapter implements ApplicationListener {
         newW = width;
         newH = height;
         extendViewport.update(width,height);
-//        screenViewport.update(width,height);
-//        stage.getViewport().update(width,height);
     }
 }

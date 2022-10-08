@@ -170,14 +170,16 @@ public class GUI extends Application {
         ImVec2 windowSize = ImGui.getWindowSize();
         operatorWinW = windowSize.x;
         operatorWinH = windowSize.y;
+        ImGui.colorEdit3("Color on Screen",colorInCam2ForImGui.data,
+                ImGuiColorEditFlags.Float
+                    | ImGuiColorEditFlags.NoBorder
+                    | ImGuiColorEditFlags.NoTooltip
+                    | ImGuiColorEditFlags.NoPicker
+                );
         ImGui.sliderFloat("Force Forward",Settings.butterflySetting.force.getData(),0.001f,30f);
         ImGui.sliderFloat("Force Rot(Left/Right)",Settings.butterflySetting.RotForce.getData(),0.001f,12f);
         if(ImGui.button("Add Force (Impulse)")){
             butterflyMainGame.butterfly.forward();
-        }
-        ImGui.sameLine();
-        if(ImGui.button("print screen pixel (1288,555)'s color")){
-            log(MainGame.getLight(1288,555));
         }
 
         if(ImGui.button("Turn Left (Rotate)")){
